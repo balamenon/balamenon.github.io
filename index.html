@@ -1,59 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Balamurali Krishna (Bala) Menon - HOME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
     <script>
-      function redirect(){
-      //window.location = "https://ondeviceguy.substack.com";
-      }
-      redirect();
+        /**function redirect() {
+            //window.location = "https://ondeviceguy.substack.com";
+        }
+        redirect();**/
+
+        // Function to truncate text
+        function truncateText(element, maxLength) {
+            if (element.textContent.length > maxLength) {
+                element.textContent = element.textContent.substring(0, maxLength) + '...';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = document.querySelectorAll('.truncate-single-line');
+            elements.forEach(element => {
+                truncateText(element, 100);
+            });
+        });
     </script>
-   <style>
-      ul.writing {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-      }
+    <style>
+        ul.writing {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #1f1f1f;
+        }
+
+        mark {
+            /* border-radius: 3px; */
+            background-color: #eceff5;
+            color: #304674;
+            padding: 2px 5px;
+            /* border-top: 1px solid #7799dd; */
+            font-size: 0.75rem;
+            line-height: 1;
+            white-space: nowrap;
+            /* border-bottom: 1px solid #7799dd; */
+        }
+
+        :root {
+            --gBg: #e5edff;
+            --gBr: #a3c9ff;
+            --gDes: #545d7e;
+            --JKqx2: #1a0dab;
+            --sans-font: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir, "Nimbus Sans L", Roboto, "Noto Sans", "Segoe UI", Arial, Helvetica, "Helvetica Neue", sans-serif !important;
+        }
+
+        header {
+            background-color: #fff !important;
+            border-bottom: 0 !important;
+            grid-column: 2 !important;
+            padding: 2rem 0 0 0 !important;
+
+        }
+
+        .notice {
+            background-color: var(--gBg) !important;
+            border-top: 1px solid var(--gBr) !important;
+            border-left: 0;
+            border-right: 0;
+            border-radius: 0;
+            border-bottom: 1px solid var(--gBr);
+        }
+
+        a {
+            color: var(--JKqx2);
+            text-decoration: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, .1)
+        }
+
+        a:visited {
+            color: #681da8
+        }
+
+        a:hover {
+            text-decoration: underline
+        }
+
+        a:hover h3 {
+            text-decoration: underline
+        }
+
+        a.a-no-hover-decoration:hover,
+        a.a-no-hover-decoration:hover h3 {
+            text-decoration: none
+        }
+
+
+        code {
+            color: var(--gDes);
+            font-family: var(--sans-font);
+        }
+
+        section {
+            border: 0;
+            margin: 0;
+            padding: 0.5rem 0;
+        }
+
+        nav>a {
+            border: 1px solid #f8f9fa !important;
+            border-radius: 8px !important;
+            color: #3c4043 !important;
+            margin: 0 !important;
+            padding: .1rem 1rem !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+            background: #f8f9fa !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+        }
+
+        nav>a:hover {
+            text-decoration: underline !important;
+        }
+
+        h2 {
+            margin-top: 0 !important;
+            font-size: 2rem !important;
+            margin-bottom: 0;
+        }
+
+        main {
+            padding-top: 0 !important;
+        }
+
+        section {
+            padding: 0 !important;
+        }
+
+        .heading {
+            border-bottom: 1px dotted var(--gBr);
+        }
+
+        .subheading {
+            color: #555 !important;
+            margin-top: 0.5rem !important;
+            font-optical-sizing: auto;
+            text-rendering: optimizeLegibility;
+            font-weight: 500;
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
     <header>
-    <h1>Hello, I'm Bala 👋</h1>
-    <p>I am the founder of <a href="https://www.ondevice.xyz">OnDevice</a>.</p>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/about.html">About</a>
-      <a href="https://ondeviceguy.substack.com">Writing</a>
-      <a href="/notes.html">Notes</a>
-      <a href="https://x.com/balabuilds">Follow on X</a>
-    </nav>
+        <h2>Balamurali Krishna Menon</h2>
+        <p class="subheading">Entrepreneur. Inventor. Product person. <a href="https://www.ondevice.xyz">#AIForAll</a>
+        </p>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/about.html">About</a>
+            <a href="/notes.html">Notes</a>
+            <a href="https://x.com/balabuilds">Follow on X</a>
+        </nav>
     </header>
     <main>
-      <p class="notice">
-        I'm a product person, drum player, entrepreneur and above all, someone who wants to build beutiful, useful things for humanity. I'm presently building <a href="https://www.ondevice.xyz">OnDevice</a>.
-      </p>
-      <section>
-      <h2>Writing</h2>
-        <ul class="writing">
-          <li><p><a href="https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free">When The Internet Stops Being Free</a><br /><code>Owning our data could rewire the internet</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 04, 2025</mark></p></li>
-          
-          <li><p><a href="https://ondeviceguy.substack.com/p/what-the-hell-is-an-ai-business-model">What the hell is an AI business model when we’re all just tired of subscriptions?</a><br /><code>On the exhausting grift of selling miracles, and how the real money gets made (it’s not how you think)</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 04, 2025</mark></p></li>
-          
-          <li><p><a href="https://ondeviceguy.substack.com/p/forget-ai-healthcares-real-problem">Forget AI. Healthcare’s real problem is way simpler</a><br /><code>The trillion dollar problem hiding in your smartwatch</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 03, 2025</mark></p></li>
-          
-          <li><p><a href="https://ondeviceguy.substack.com/p/what-the-hell-is-an-ai-business-model">When The Internet Stops Being Free</a><br /><code>On the exhausting grift of selling miracles, and how the real money gets made (it’s not how you think).</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 04, 2025</mark></p></li>
-          <li><p><a href="https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free">When The Internet Stops Being Free</a><br /><code>Owning our data could rewire the internet</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 04, 2025</mark></p></li>
-          <li><p><a href="https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free">When The Internet Stops Being Free</a><br /><code>Owning our data could rewire the internet</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 04, 2025</mark></p></li>
-          <li><p><a href="https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free">When The Internet Stops Being Free</a><br /><code>Owning our data could rewire the internet</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 04, 2025</mark></p></li>
-          <li><p><a href="https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free">When The Internet Stops Being Free</a><br /><code>Owning our data could rewire the internet</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 04, 2025</mark></p></li>
-          <li><p><a href="https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free">When The Internet Stops Being Free</a><br /><code>Owning our data could rewire the internet</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 04, 2025</mark></p></li>
-          <li><p><a href="https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free">When The Internet Stops Being Free</a><br /><code>Owning our data could rewire the internet</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<mark>Dec 04, 2025</mark></p></li>
-          <li><p><a href="https://ondeviceguy.substack.com">View more ...</a></p></li>
-        </ul>
-      </section>
+        <p class="notice">
+            I'm a product person, drum player, entrepreneur and above all, someone who wants to build beutiful, useful
+            things for humanity. I'm presently building <a href="https://www.ondevice.xyz">OnDevice</a>.
+        </p>
+        <section>
+            <h4 class="heading">Writing</h4>
+            <ul class="writing">
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free">When The Internet
+                            Stops Being
+                            Free</a><br /><mark>Dec
+                            04, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">Owning our data could rewire the internet</code></p>
+                </li>
+
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/what-the-hell-is-an-ai-business-model">What the hell
+                            is an AI business model when we’re all just tired of
+                            subscriptions?</a><br /><mark>Dec
+                            04, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">On the exhausting grift of selling miracles, and how the real money gets made (it’s not how you think)</code>
+                    </p>
+                </li>
+
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/forget-ai-healthcares-real-problem">Forget AI.
+                            Healthcare’s real problem is way
+                            simpler</a><br /><mark>Dec
+                            03, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">The trillion dollar problem hiding in your smartwatch</code>
+                    </p>
+                </li>
+
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/the-hidden-cost-of-always-choosing">The hidden cost
+                            of always choosing the cheapest option</a><br /><mark>Nov
+                            13, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">Why minimizing cost often maximizes regret</code>
+                    </p>
+                </li>
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/the-internet-of-intelligence-a-thesis">The Internet
+                            of Intelligence: A Thesis and Playbook for Edge AI</a><br /><mark>Nov
+                            03, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">The next computing platform isn’t in the cloud. It’s on every device you own. Here’s how to build it.</code>
+                    </p>
+                </li>
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/the-republics-guardrail">The Republic’s
+                            Guardrail</a><br /><mark>Nov
+                            02, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">Why our future depends on the difference between a democracy and a constitutional republic</code>
+                    </p>
+                </li>
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/the-ai-monetization-blueprint-the">The AI
+                            Monetization Blueprint (the only one that works)</a><br /><mark>Nov
+                            02, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">Charting the New Economy of Ads, Actions, and Agents</code></p>
+                </li>
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/the-permission-no-one-gave-me-and">The Permission No
+                            One Gave Me</a><br /><mark>Nov
+                            02, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">And why that mattered</code></p>
+                </li>
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/a-promise-to-the-braver-you">A Promise to the Braver
+                            You</a><br /><mark>Nov
+                            01, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">Persist.</code></p>
+                </li>
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/fiverr-could-make-the-robotaxi-for">Fiverr: the next
+                            assembly line for AI built products</a><br /><mark>Sep
+                            17, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">They could build themselves into the Robotaxi equivalent for knowledge workers in tech.</code>
+                    </p>
+                </li>
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com/p/ai-wont-make-money-selling-itself">AI won't make
+                            money selling itself, it'll make money selling you</a><br /><mark>Sep
+                            06, 2025</mark>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code
+                            class="truncate-single-line">Ads, actions, and agent-driven transactions will pay to keep NVIDIA and other GPU manufacturers alive.</code>
+                    </p>
+                </li>
+                <li>
+                    <p><a href="https://ondeviceguy.substack.com">View more ...</a></p>
+                </li>
+            </ul>
+        </section>
     </main>
-  </body>
+</body>
+
 </html>
