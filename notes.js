@@ -74,6 +74,44 @@
     statusEl.classList.toggle("error", !!isError);
   }
 
+  function renderSkeleton() {
+    root.innerHTML = "";
+
+    for (let g = 0; g < 2; g += 1) {
+      const group = document.createElement("section");
+      group.className = "skeleton-group";
+
+      const day = document.createElement("div");
+      day.className = "skeleton-day";
+      group.appendChild(day);
+
+      for (let n = 0; n < 3; n += 1) {
+        const note = document.createElement("article");
+        note.className = "skeleton-note";
+
+        const meta = document.createElement("div");
+        meta.className = "skeleton-meta";
+        note.appendChild(meta);
+
+        const line1 = document.createElement("div");
+        line1.className = "skeleton-line";
+        note.appendChild(line1);
+
+        const line2 = document.createElement("div");
+        line2.className = "skeleton-line";
+        note.appendChild(line2);
+
+        const line3 = document.createElement("div");
+        line3.className = "skeleton-line short";
+        note.appendChild(line3);
+
+        group.appendChild(note);
+      }
+
+      root.appendChild(group);
+    }
+  }
+
   function updateUrl(page) {
     const url = new URL(window.location.href);
     url.searchParams.set("page", String(page));
@@ -328,7 +366,8 @@
   }
 
   async function fetchPage(page) {
-    setStatus("Loading notes...", false);
+    setStatus("", false);
+    renderSkeleton();
 
     try {
       const url = new URL((NOTES_API_BASE || window.location.origin) + "/api/notes");
