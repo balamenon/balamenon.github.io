@@ -518,6 +518,39 @@
             }
         }
 
+        /* Footer */
+        body > footer {
+            border-top: 0.5px solid #e6e1d7;
+            text-align: left !important;
+            margin-top: 3.5rem;
+            padding: 2rem 0 2rem !important;
+            font-size: 0.875rem !important;
+            color: inherit !important;
+        }
+
+        .footer-nav {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .footer-nav a,
+        .footer-nav a:visited {
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            color: #7a7672;
+            text-decoration: none;
+            letter-spacing: 0;
+            transition: color 0.15s ease;
+        }
+
+        .footer-nav a:hover {
+            color: #2d2d2d;
+            text-decoration: none !important;
+        }
+
         @media only screen and (width<=720px) {
             .site-name {
                 font-size: clamp(2rem, 14vw, 3.2rem) !important;
@@ -570,6 +603,14 @@
             </ul>
         </section>
     </main>
+    <footer>
+        <nav class="footer-nav" aria-label="Footer navigation">
+            <a href="mailto:bala@ondevice.xyz">Email</a>
+            <a href="https://x.com/balabuilds" target="_blank" rel="noopener noreferrer">X</a>
+            <a href="https://ondeviceguy.substack.com" target="_blank" rel="noopener noreferrer">Substack</a>
+            <a href="https://balamenon.com/about.html" target="_blank" rel="noopener noreferrer">About</a>
+        </nav>
+    </footer>
 </body>
 
 </html>
