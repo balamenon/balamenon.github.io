@@ -98,10 +98,19 @@ async function sendTelegramThought(env: Env, input: { noteId: number; sender: st
   const noteTimestamp = target.created_at;
   const destinationChat = target.source_chat_id?.trim() || env.ALLOWED_TELEGRAM_ID;
   const messageId = target.source_message_id ? Number.parseInt(target.source_message_id, 10) : NaN;
+  const normalizedSender = input.sender.trim();
+  let senderLine = normalizedSender;
+
+  if (normalizedSender.startsWith("@")) {
+    const xUsername = normalizedSender.slice(1).match(/^[A-Za-z0-9_]{1,15}$/)?.[0];
+    if (xUsername) {
+      senderLine = `${normalizedSender} (https://x.com/${xUsername})`;
+    }
+  }
 
   const text =
     `💬 New thought on note #${target.id}\n` +
-    `From: ${input.sender}\n` +
+    `From: ${senderLine}\n` +
     `Note date: ${noteTimestamp}\n` +
     `Excerpt: ${noteExcerpt}${target.content.length > 160 ? "..." : ""}\n\n` +
     `${input.message}`;
