@@ -1,5 +1,6 @@
 (function () {
   const NOTES_API_BASE = window.NOTES_API_BASE || "";
+  const TURNSTILE_SITE_KEY = window.TURNSTILE_SITE_KEY || "";
   const PAGE_SIZE = 10;
 
   const root = document.getElementById("notes-root");
@@ -140,7 +141,7 @@
     }
   }
 
-  async function submitThought(noteId, sender, message) {
+  async function submitThought(noteId, sender, message, turnstileToken) {
     const url = new URL((NOTES_API_BASE || window.location.origin) + `/api/notes/${noteId}/thoughts`);
     const response = await fetch(url.toString(), {
       method: "POST",
@@ -151,6 +152,7 @@
       body: JSON.stringify({
         sender,
         message,
+        turnstile_token: turnstileToken || "",
       }),
     });
 
@@ -192,6 +194,9 @@
     messageInput.maxLength = 2000;
     messageInput.placeholder = "Share your thoughts on this note...";
 
+    const turnstileSlot = document.createElement("div");
+    turnstileSlot.className = "thought-turnstile";
+
     const actions = document.createElement("div");
     actions.className = "thought-actions";
 
@@ -207,6 +212,21 @@
 
     const feedback = document.createElement("p");
     feedback.className = "thought-feedback";
+    let turnstileWidgetId = null;
+    let turnstileReady = false;
+
+    function ensureTurnstileWidget() {
+      if (!TURNSTILE_SITE_KEY || turnstileReady) {
+        return;
+      }
+      if (!window.turnstile || typeof window.turnstile.render !== "function") {
+        return;
+      }
+      turnstileWidgetId = window.turnstile.render(turnstileSlot, {
+        sitekey: TURNSTILE_SITE_KEY,
+      });
+      turnstileReady = true;
+    }
 
     actions.appendChild(sendButton);
     actions.appendChild(cancelButton);
@@ -215,6 +235,7 @@
     callout.appendChild(senderInput);
     callout.appendChild(messageLabel);
     callout.appendChild(messageInput);
+    callout.appendChild(turnstileSlot);
     callout.appendChild(actions);
     callout.appendChild(feedback);
 
@@ -225,6 +246,7 @@
         callout.classList.remove("sending");
         callout.classList.add("open");
         activeThoughtCallout = callout;
+        ensureTurnstileWidget();
         senderInput.focus();
       }
     });
@@ -246,6 +268,16 @@
       }
       if (!message) {
         feedback.textContent = "Please add a message.";
+        return;
+      }
+
+      const turnstileToken =
+        turnstileWidgetId !== null && window.turnstile && typeof window.turnstile.getResponse === "function"
+          ? window.turnstile.getResponse(turnstileWidgetId)
+          : "";
+
+      if (TURNSTILE_SITE_KEY && !turnstileToken) {
+        feedback.textContent = "Please complete verification.";
         return;
       }
 
@@ -278,12 +310,17 @@
         sendButton.disabled = false;
       }, 430);
 
-      submitThought(note.id, submittedSender, submittedMessage)
+      submitThought(note.id, submittedSender, submittedMessage, turnstileToken)
         .then(function () {
           showToast("sent", "Thought sent. Thank you.", 2400);
         })
         .catch(function (error) {
           showToast("failed", error.message || "Could not send your thoughts.", 3200);
+        })
+        .finally(function () {
+          if (turnstileWidgetId !== null && window.turnstile && typeof window.turnstile.reset === "function") {
+            window.turnstile.reset(turnstileWidgetId);
+          }
         });
     });
 

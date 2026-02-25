@@ -1,4 +1,4 @@
-import { getAllNotes, getNoteThoughtTarget, updateNote } from "./db";
+import { consumeThoughtRateLimit, getAllNotes, getNoteThoughtTarget, updateNote } from "./db";
 import { MAX_NOTE_WORDS, countWords, paginateNotes } from "./logic";
 import { listCachedSubstackPosts, toJsonl } from "./substack";
 import { handleTelegramWebhook, type Env as TelegramEnv } from "./telegram";
@@ -6,6 +6,8 @@ import { handleTelegramWebhook, type Env as TelegramEnv } from "./telegram";
 type Env = TelegramEnv & {
   INTERNAL_API_TOKEN?: string;
   SUBSTACK_FEED_URL?: string;
+  ALLOWED_ORIGINS?: string;
+  TURNSTILE_SECRET_KEY?: string;
 };
 
 function json(body: unknown, init?: ResponseInit): Response {
@@ -18,21 +20,41 @@ function json(body: unknown, init?: ResponseInit): Response {
   });
 }
 
-function corsHeaders(request: Request): Record<string, string> {
-  const origin = request.headers.get("Origin") ?? "*";
-  return {
-    "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Telegram-Bot-Api-Secret-Token",
-  };
+function parseAllowedOrigins(env: Env): Set<string> {
+  const configured = env.ALLOWED_ORIGINS?.trim();
+  if (!configured) {
+    return new Set(["https://balamenon.com", "https://www.balamenon.com", "https://balamenon.github.io"]);
+  }
+
+  return new Set(
+    configured
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
 }
 
-function withCors(response: Response, request: Request): Response {
-  const headers = new Headers(response.headers);
-  const cors = corsHeaders(request);
-  for (const [key, value] of Object.entries(cors)) {
-    headers.set(key, value);
+function resolveCorsOrigin(request: Request, env: Env): string | null {
+  const origin = request.headers.get("Origin");
+  if (!origin) {
+    return null;
   }
+
+  const allowed = parseAllowedOrigins(env);
+  return allowed.has(origin) ? origin : null;
+}
+
+function withCors(response: Response, request: Request, env: Env): Response {
+  const headers = new Headers(response.headers);
+  const allowedOrigin = resolveCorsOrigin(request, env);
+
+  if (allowedOrigin) {
+    headers.set("Access-Control-Allow-Origin", allowedOrigin);
+    headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    headers.set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Telegram-Bot-Api-Secret-Token");
+    headers.set("Vary", "Origin");
+  }
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -96,8 +118,6 @@ async function sendTelegramThought(env: Env, input: { noteId: number; sender: st
     throw new Error("NOTE_NOT_FOUND");
   }
 
-  const noteExcerpt = target.content.replace(/\s+/g, " ").trim().slice(0, 160);
-  const noteTimestamp = target.created_at;
   const destinationChat = target.source_chat_id?.trim() || env.ALLOWED_TELEGRAM_ID;
   const messageId = target.source_message_id ? Number.parseInt(target.source_message_id, 10) : NaN;
   const normalizedSender = input.sender.trim();
@@ -113,8 +133,7 @@ async function sendTelegramThought(env: Env, input: { noteId: number; sender: st
   const text =
     `💬 New thought on note #${target.id}\n` +
     `From: ${senderLine}\n` +
-    `Note date: ${noteTimestamp}\n` +
-    `Excerpt: ${noteExcerpt}${target.content.length > 160 ? "..." : ""}\n\n` +
+    `Received: ${new Date().toISOString()}\n\n` +
     `${input.message}`;
 
   const payload: Record<string, unknown> = {
@@ -143,10 +162,85 @@ async function sendTelegramThought(env: Env, input: { noteId: number; sender: st
   }
 }
 
-async function handleThoughtsApi(request: Request, env: Env, noteId: number): Promise<Response> {
-  let body: { sender?: string; message?: string };
+async function verifyTurnstile(request: Request, env: Env, token: string): Promise<boolean> {
+  const secret = env.TURNSTILE_SECRET_KEY?.trim();
+  if (!secret) {
+    return true;
+  }
+
+  if (!token) {
+    return false;
+  }
+
+  const form = new URLSearchParams();
+  form.set("secret", secret);
+  form.set("response", token);
+
+  const remoteIp = request.headers.get("CF-Connecting-IP");
+  if (remoteIp) {
+    form.set("remoteip", remoteIp);
+  }
+
   try {
-    body = (await request.json()) as { sender?: string; message?: string };
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      body: form.toString(),
+    });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const payload = (await response.json()) as { success?: boolean };
+    return payload.success === true;
+  } catch {
+    return false;
+  }
+}
+
+function enforceAllowedOrigin(request: Request, env: Env): Response | null {
+  const origin = request.headers.get("Origin");
+  if (!origin) {
+    return null;
+  }
+
+  if (!resolveCorsOrigin(request, env)) {
+    return json({ ok: false, error: "Origin not allowed" }, { status: 403 });
+  }
+
+  return null;
+}
+
+async function handleThoughtsApi(request: Request, env: Env, noteId: number): Promise<Response> {
+  const blockedOrigin = enforceAllowedOrigin(request, env);
+  if (blockedOrigin) {
+    return blockedOrigin;
+  }
+
+  const ip = request.headers.get("CF-Connecting-IP")?.trim() || "unknown";
+  const rateResult = await consumeThoughtRateLimit(env.DB, `thought:${ip}`, 8, 60);
+  if (!rateResult.allowed) {
+    return json(
+      {
+        ok: false,
+        error: "Too many requests, please wait and try again.",
+        retry_after_seconds: rateResult.retryAfterSeconds,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateResult.retryAfterSeconds),
+        },
+      },
+    );
+  }
+
+  let body: { sender?: string; message?: string; turnstile_token?: string };
+  try {
+    body = (await request.json()) as { sender?: string; message?: string; turnstile_token?: string };
   } catch {
     return json({ ok: false, error: "Invalid JSON payload" }, { status: 400 });
   }
@@ -160,6 +254,11 @@ async function handleThoughtsApi(request: Request, env: Env, noteId: number): Pr
 
   if (!message || message.length > 2000) {
     return json({ ok: false, error: "message is required and must be <= 2000 characters" }, { status: 400 });
+  }
+
+  const turnstileOk = await verifyTurnstile(request, env, body.turnstile_token?.trim() ?? "");
+  if (!turnstileOk) {
+    return json({ ok: false, error: "Verification failed" }, { status: 400 });
   }
 
   try {
@@ -204,49 +303,53 @@ async function handleSubstackJsonlApi(request: Request, env: Env): Promise<Respo
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") {
-      return withCors(new Response(null, { status: 204 }), request);
+      const origin = request.headers.get("Origin");
+      if (origin && !resolveCorsOrigin(request, env)) {
+        return json({ ok: false, error: "Origin not allowed" }, { status: 403 });
+      }
+      return withCors(new Response(null, { status: 204 }), request, env);
     }
 
     const url = new URL(request.url);
 
     if (request.method === "GET" && url.pathname === "/api/health") {
-      return withCors(json({ ok: true }), request);
+      return withCors(json({ ok: true }), request, env);
     }
 
     if (request.method === "GET" && (url.pathname === "/api/notes" || url.pathname === "/notes")) {
       const response = await handleNotesApi(request, env);
-      return withCors(response, request);
+      return withCors(response, request, env);
     }
 
     if (request.method === "POST" && url.pathname === "/api/telegram/webhook") {
       const response = await handleTelegramWebhook(request, env);
-      return withCors(response, request);
+      return withCors(response, request, env);
     }
 
     if (request.method === "GET" && url.pathname === "/api/substack/posts") {
       const response = await handleSubstackPostsApi(request, env);
-      return withCors(response, request);
+      return withCors(response, request, env);
     }
 
     if (request.method === "GET" && url.pathname === "/api/substack/posts.jsonl") {
       const response = await handleSubstackJsonlApi(request, env);
-      return withCors(response, request);
+      return withCors(response, request, env);
     }
 
     const editMatch = url.pathname.match(/^\/api\/notes\/(\d+)\/edit$/);
     if (request.method === "POST" && editMatch) {
       const noteId = Number.parseInt(editMatch[1], 10);
       const response = await handleInternalEditApi(request, env, noteId);
-      return withCors(response, request);
+      return withCors(response, request, env);
     }
 
     const thoughtsMatch = url.pathname.match(/^\/api\/notes\/(\d+)\/thoughts$/);
     if (request.method === "POST" && thoughtsMatch) {
       const noteId = Number.parseInt(thoughtsMatch[1], 10);
       const response = await handleThoughtsApi(request, env, noteId);
-      return withCors(response, request);
+      return withCors(response, request, env);
     }
 
-    return withCors(json({ ok: false, error: "Not found" }, { status: 404 }), request);
+    return withCors(json({ ok: false, error: "Not found" }, { status: 404 }), request, env);
   },
 };

@@ -43,6 +43,12 @@ type SessionRow = {
   expires_at: string;
 };
 
+type ThoughtRateLimitRow = {
+  key: string;
+  window_start: number;
+  count: number;
+};
+
 export async function insertNote(
   db: D1Database,
   input: {
@@ -270,4 +276,75 @@ export async function getSubstackPosts(db: D1Database, limit: number): Promise<S
     pub_date: row.pub_date,
     updated_at: row.updated_at,
   }));
+}
+
+export type ThoughtRateLimitResult = {
+  allowed: boolean;
+  remaining: number;
+  retryAfterSeconds: number;
+};
+
+export async function consumeThoughtRateLimit(
+  db: D1Database,
+  key: string,
+  maxRequests: number,
+  windowSeconds: number,
+): Promise<ThoughtRateLimitResult> {
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const windowStart = nowSeconds - (nowSeconds % windowSeconds);
+
+  const current = await db
+    .prepare(
+      `SELECT key, window_start, count
+       FROM thought_rate_limits
+       WHERE key = ?`,
+    )
+    .bind(key)
+    .first<ThoughtRateLimitRow>();
+
+  if (!current || Number(current.window_start) !== windowStart) {
+    await db
+      .prepare(
+        `INSERT INTO thought_rate_limits (key, window_start, count)
+         VALUES (?, ?, 1)
+         ON CONFLICT(key)
+         DO UPDATE SET
+           window_start = excluded.window_start,
+           count = excluded.count,
+           updated_at = (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+      )
+      .bind(key, windowStart)
+      .run();
+
+    return {
+      allowed: true,
+      remaining: Math.max(0, maxRequests - 1),
+      retryAfterSeconds: windowSeconds,
+    };
+  }
+
+  const currentCount = Number(current.count);
+  if (currentCount >= maxRequests) {
+    return {
+      allowed: false,
+      remaining: 0,
+      retryAfterSeconds: Math.max(1, windowStart + windowSeconds - nowSeconds),
+    };
+  }
+
+  const nextCount = currentCount + 1;
+  await db
+    .prepare(
+      `UPDATE thought_rate_limits
+       SET count = ?, updated_at = (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+       WHERE key = ?`,
+    )
+    .bind(nextCount, key)
+    .run();
+
+  return {
+    allowed: true,
+    remaining: Math.max(0, maxRequests - nextCount),
+    retryAfterSeconds: Math.max(1, windowStart + windowSeconds - nowSeconds),
+  };
 }

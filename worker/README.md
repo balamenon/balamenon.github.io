@@ -57,6 +57,7 @@ npx wrangler d1 migrations apply bala_notes --remote
 npx wrangler secret put TELEGRAM_BOT_TOKEN
 npx wrangler secret put TELEGRAM_WEBHOOK_SECRET
 npx wrangler secret put INTERNAL_API_TOKEN
+npx wrangler secret put TURNSTILE_SECRET_KEY
 ```
 
 7. Deploy:
@@ -82,6 +83,12 @@ curl -X POST "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook" \
 - `/editnote` lists 20 recent notes with inline selection
 - `/deletenote` lists 20 recent notes with inline delete selection
 - `/reindex` refreshes cached Substack posts in D1
+
+## Security settings
+
+- `ALLOWED_ORIGINS` (`wrangler.jsonc` var): comma-separated origin allowlist for CORS.
+- `TURNSTILE_SECRET_KEY` (secret): enables bot-thought submission verification.
+- In `notes.html`, set `window.TURNSTILE_SITE_KEY` to your Turnstile site key to activate the widget.
 
 If text exceeds 10,000 words, the bot shows truncation preview and lets you save truncated content or cancel/edit.
 

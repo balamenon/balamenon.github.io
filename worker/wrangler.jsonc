@@ -11,6 +11,7 @@
     }
   ],
   "vars": {
-    "ALLOWED_TELEGRAM_ID": "6873032530"
+    "ALLOWED_TELEGRAM_ID": "6873032530",
+    "ALLOWED_ORIGINS": "https://balamenon.com,https://www.balamenon.com,https://balamenon.github.io"
   }
 }
