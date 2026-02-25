@@ -8,7 +8,9 @@
   const nextBtn = document.getElementById("next-page");
   const pageLabel = document.getElementById("page-label");
   const retryBtn = document.getElementById("retry-button");
+  const thoughtToast = document.getElementById("thought-toast");
   let activeThoughtCallout = null;
+  let toastTimer = null;
 
   let currentPage = Number.parseInt(new URLSearchParams(window.location.search).get("page") || "1", 10);
   if (Number.isNaN(currentPage) || currentPage < 1) {
@@ -82,6 +84,22 @@
     if (!activeThoughtCallout) return;
     activeThoughtCallout.classList.remove("open");
     activeThoughtCallout = null;
+  }
+
+  function showToast(kind, text, autoHideMs) {
+    if (!thoughtToast) return;
+    thoughtToast.classList.remove("sending", "sent", "failed", "show");
+    thoughtToast.textContent = text;
+    thoughtToast.classList.add(kind, "show");
+    if (toastTimer) {
+      clearTimeout(toastTimer);
+      toastTimer = null;
+    }
+    if (autoHideMs && autoHideMs > 0) {
+      toastTimer = setTimeout(function () {
+        thoughtToast.classList.remove("show");
+      }, autoHideMs);
+    }
   }
 
   async function submitThought(noteId, sender, message) {
@@ -195,6 +213,14 @@
 
       sendButton.disabled = true;
       callout.classList.add("sending");
+      const rect = callout.getBoundingClientRect();
+      const targetX = window.innerWidth - 24;
+      const targetY = 18;
+      const deltaX = Math.round(targetX - rect.right);
+      const deltaY = Math.round(targetY - rect.top);
+      callout.style.setProperty("--fly-x", `${deltaX}px`);
+      callout.style.setProperty("--fly-y", `${deltaY}px`);
+      showToast("sending", "Sending your thoughts...", 0);
 
       const submittedSender = sender;
       const submittedMessage = message;
@@ -206,6 +232,8 @@
       setTimeout(function () {
         callout.classList.remove("open");
         callout.classList.remove("sending");
+        callout.style.removeProperty("--fly-x");
+        callout.style.removeProperty("--fly-y");
         if (activeThoughtCallout === callout) {
           activeThoughtCallout = null;
         }
@@ -214,15 +242,10 @@
 
       submitThought(note.id, submittedSender, submittedMessage)
         .then(function () {
-          setStatus("Thought sent. Thank you.", false);
-          setTimeout(function () {
-            if (statusEl.textContent === "Thought sent. Thank you.") {
-              setStatus("", false);
-            }
-          }, 2200);
+          showToast("sent", "Thought sent. Thank you.", 2400);
         })
         .catch(function (error) {
-          setStatus(error.message || "Could not send your thoughts.", true);
+          showToast("failed", error.message || "Could not send your thoughts.", 3200);
         });
     });
 
