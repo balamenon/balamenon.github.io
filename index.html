@@ -14,6 +14,33 @@
     <!--<link rel="stylesheet" href="simple.min.css">-->
     <script>
         const CONTENT_API_BASE = "https://bala-notes-worker.menon-bala.workers.dev";
+        const FALLBACK_POSTS = [
+            {
+                title: "India needs its own demand generation engine",
+                link: "https://ondeviceguy.substack.com/p/india-needs-its-own-demand-generation",
+                description: "How to fix the Indian SaaS demand generation problem"
+            },
+            {
+                title: "When The Internet Stops Being Free",
+                link: "https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free",
+                description: "Owning our data could rewire the internet"
+            },
+            {
+                title: "What the hell is an AI business model when we’re all just tired of subscriptions?",
+                link: "https://ondeviceguy.substack.com/p/what-the-hell-is-an-ai-business-model",
+                description: "On the exhausting grift of selling miracles, and how the real money gets made."
+            },
+            {
+                title: "Forget AI. Healthcare’s real problem is way simpler",
+                link: "https://ondeviceguy.substack.com/p/forget-ai-healthcares-real-problem",
+                description: "The trillion dollar problem hiding in your smartwatch"
+            },
+            {
+                title: "The hidden cost of always choosing the cheapest option",
+                link: "https://ondeviceguy.substack.com/p/the-hidden-cost-of-always-choosing",
+                description: "Why minimizing cost often maximizes regret"
+            }
+        ];
 
         function truncateText(element, maxLength) {
             if (element.textContent.length > maxLength) {
@@ -21,7 +48,7 @@
             }
         }
 
-        function renderWritingPosts(posts) {
+        function renderWritingPosts(posts, fallbackMessage) {
             const writingList = document.getElementById("writing-list");
             if (!writingList) {
                 return;
@@ -49,6 +76,17 @@
                 writingList.appendChild(li);
             });
 
+            if (fallbackMessage) {
+                const msgLi = document.createElement("li");
+                const msgP = document.createElement("p");
+                const msgCode = document.createElement("code");
+                msgCode.className = "truncate-single-line";
+                msgCode.textContent = fallbackMessage;
+                msgP.appendChild(msgCode);
+                msgLi.appendChild(msgP);
+                writingList.appendChild(msgLi);
+            }
+
             const viewMoreLi = document.createElement("li");
             const viewMoreP = document.createElement("p");
             const viewMoreA = document.createElement("a");
@@ -64,7 +102,14 @@
                 .split('\n')
                 .map((line) => line.trim())
                 .filter((line) => line.length > 0)
-                .map((line) => JSON.parse(line));
+                .map((line) => {
+                    try {
+                        return JSON.parse(line);
+                    } catch {
+                        return null;
+                    }
+                })
+                .filter((item) => item && item.title && item.link);
         }
 
         async function syncSubstackPosts() {
@@ -89,6 +134,7 @@
                 renderWritingPosts(posts);
             } catch (error) {
                 console.error("Could not sync Substack posts:", error);
+                renderWritingPosts(FALLBACK_POSTS, "Live sync unavailable. Showing fallback list.");
             }
         }
 
