@@ -329,14 +329,14 @@
     return container;
   }
 
-  function createNoteElement(note) {
+  function createNoteElement(note, displayNumber) {
     const article = document.createElement("article");
     article.className = "note-item";
 
     const meta = document.createElement("p");
     meta.className = "note-meta";
     const timeAgo = formatTimeAgo(note.created_at);
-    meta.textContent = `#${note.id} | ${note.word_count} words | ${timeAgo}`;
+    meta.textContent = `#${displayNumber} | ${note.word_count} words | ${timeAgo}`;
     meta.title = note.created_at;
     article.appendChild(meta);
 
@@ -394,8 +394,9 @@
       heading.textContent = formatGroupDate(group.date_utc);
       section.appendChild(heading);
 
-      group.notes.forEach(function (note) {
-        section.appendChild(createNoteElement(note));
+      var totalInGroup = group.notes.length;
+      group.notes.forEach(function (note, index) {
+        section.appendChild(createNoteElement(note, totalInGroup - index));
       });
 
       root.appendChild(section);
