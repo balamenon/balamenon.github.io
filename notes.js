@@ -8,6 +8,7 @@
   const nextBtn = document.getElementById("next-page");
   const pageLabel = document.getElementById("page-label");
   const retryBtn = document.getElementById("retry-button");
+  let activeThoughtCallout = null;
 
   let currentPage = Number.parseInt(new URLSearchParams(window.location.search).get("page") || "1", 10);
   if (Number.isNaN(currentPage) || currentPage < 1) {
@@ -77,6 +78,147 @@
     window.history.replaceState({}, "", url.toString());
   }
 
+  function closeActiveThoughtCallout() {
+    if (!activeThoughtCallout) return;
+    activeThoughtCallout.classList.remove("open");
+    activeThoughtCallout = null;
+  }
+
+  async function submitThought(noteId, sender, message) {
+    const url = new URL((NOTES_API_BASE || window.location.origin) + `/api/notes/${noteId}/thoughts`);
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        sender,
+        message,
+      }),
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(function () {
+        return { error: `API error ${response.status}` };
+      });
+      throw new Error(payload.error || `API error ${response.status}`);
+    }
+  }
+
+  function createThoughtComposer(note) {
+    const container = document.createElement("div");
+    container.className = "thoughts-wrap";
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "thought-trigger";
+    trigger.textContent = "Send thoughts?";
+
+    const callout = document.createElement("div");
+    callout.className = "thought-callout";
+
+    const senderLabel = document.createElement("label");
+    senderLabel.className = "thought-label";
+    senderLabel.textContent = "Name or X handle";
+
+    const senderInput = document.createElement("input");
+    senderInput.type = "text";
+    senderInput.maxLength = 80;
+    senderInput.placeholder = "e.g. @yourhandle";
+
+    const messageLabel = document.createElement("label");
+    messageLabel.className = "thought-label";
+    messageLabel.textContent = "Your message";
+
+    const messageInput = document.createElement("textarea");
+    messageInput.rows = 4;
+    messageInput.maxLength = 2000;
+    messageInput.placeholder = "Share your thoughts on this note...";
+
+    const actions = document.createElement("div");
+    actions.className = "thought-actions";
+
+    const sendButton = document.createElement("button");
+    sendButton.type = "button";
+    sendButton.className = "thought-send";
+    sendButton.textContent = "Send";
+
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "thought-cancel";
+    cancelButton.textContent = "Cancel";
+
+    const feedback = document.createElement("p");
+    feedback.className = "thought-feedback";
+
+    actions.appendChild(sendButton);
+    actions.appendChild(cancelButton);
+
+    callout.appendChild(senderLabel);
+    callout.appendChild(senderInput);
+    callout.appendChild(messageLabel);
+    callout.appendChild(messageInput);
+    callout.appendChild(actions);
+    callout.appendChild(feedback);
+
+    trigger.addEventListener("click", function () {
+      const wasOpen = callout.classList.contains("open");
+      closeActiveThoughtCallout();
+      if (!wasOpen) {
+        callout.classList.add("open");
+        activeThoughtCallout = callout;
+        senderInput.focus();
+      }
+    });
+
+    cancelButton.addEventListener("click", function () {
+      callout.classList.remove("open");
+      if (activeThoughtCallout === callout) {
+        activeThoughtCallout = null;
+      }
+      feedback.textContent = "";
+    });
+
+    sendButton.addEventListener("click", async function () {
+      const sender = senderInput.value.trim();
+      const message = messageInput.value.trim();
+      if (!sender) {
+        feedback.textContent = "Please add your name or X handle.";
+        return;
+      }
+      if (!message) {
+        feedback.textContent = "Please add a message.";
+        return;
+      }
+
+      sendButton.disabled = true;
+      feedback.textContent = "Sending...";
+
+      try {
+        await submitThought(note.id, sender, message);
+        feedback.textContent = "Sent. Thank you.";
+        senderInput.value = "";
+        messageInput.value = "";
+        setTimeout(function () {
+          callout.classList.remove("open");
+          if (activeThoughtCallout === callout) {
+            activeThoughtCallout = null;
+          }
+          feedback.textContent = "";
+        }, 800);
+      } catch (error) {
+        feedback.textContent = error.message || "Could not send your thoughts.";
+      } finally {
+        sendButton.disabled = false;
+      }
+    });
+
+    container.appendChild(trigger);
+    container.appendChild(callout);
+    return container;
+  }
+
   function createNoteElement(note) {
     const article = document.createElement("article");
     article.className = "note-item";
@@ -119,6 +261,7 @@
     }
 
     article.appendChild(content);
+    article.appendChild(createThoughtComposer(note));
     return article;
   }
 
@@ -196,6 +339,15 @@
 
   retryBtn.addEventListener("click", function () {
     fetchPage(currentPage);
+  });
+
+  document.addEventListener("click", function (event) {
+    if (!activeThoughtCallout) return;
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (!activeThoughtCallout.contains(target) && !target.closest(".thoughts-wrap")) {
+      closeActiveThoughtCallout();
+    }
   });
 
   fetchPage(currentPage);

@@ -1,4 +1,4 @@
-import { getAllNotes, updateNote } from "./db";
+import { getAllNotes, getNoteThoughtTarget, updateNote } from "./db";
 import { MAX_NOTE_WORDS, countWords, paginateNotes } from "./logic";
 import { handleTelegramWebhook, type Env as TelegramEnv } from "./telegram";
 
@@ -88,6 +88,81 @@ async function handleInternalEditApi(request: Request, env: Env, noteId: number)
   return json({ ok: true, note_id: noteId, word_count: words });
 }
 
+async function sendTelegramThought(env: Env, input: { noteId: number; sender: string; message: string }): Promise<void> {
+  const target = await getNoteThoughtTarget(env.DB, input.noteId);
+  if (!target) {
+    throw new Error("NOTE_NOT_FOUND");
+  }
+
+  const noteExcerpt = target.content.replace(/\s+/g, " ").trim().slice(0, 160);
+  const noteTimestamp = target.created_at;
+  const destinationChat = target.source_chat_id?.trim() || env.ALLOWED_TELEGRAM_ID;
+  const messageId = target.source_message_id ? Number.parseInt(target.source_message_id, 10) : NaN;
+
+  const text =
+    `💬 New thought on note #${target.id}\n` +
+    `From: ${input.sender}\n` +
+    `Note date: ${noteTimestamp}\n` +
+    `Excerpt: ${noteExcerpt}${target.content.length > 160 ? "..." : ""}\n\n` +
+    `${input.message}`;
+
+  const payload: Record<string, unknown> = {
+    chat_id: destinationChat,
+    text,
+  };
+
+  if (Number.isInteger(messageId) && messageId > 0 && target.source_chat_id?.trim()) {
+    payload.reply_parameters = {
+      message_id: messageId,
+    };
+  }
+
+  const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    console.error("Thought relay failed:", response.status, detail);
+    throw new Error("TELEGRAM_RELAY_FAILED");
+  }
+}
+
+async function handleThoughtsApi(request: Request, env: Env, noteId: number): Promise<Response> {
+  let body: { sender?: string; message?: string };
+  try {
+    body = (await request.json()) as { sender?: string; message?: string };
+  } catch {
+    return json({ ok: false, error: "Invalid JSON payload" }, { status: 400 });
+  }
+
+  const sender = body.sender?.trim() ?? "";
+  const message = body.message?.trim() ?? "";
+
+  if (!sender || sender.length > 80) {
+    return json({ ok: false, error: "sender is required and must be <= 80 characters" }, { status: 400 });
+  }
+
+  if (!message || message.length > 2000) {
+    return json({ ok: false, error: "message is required and must be <= 2000 characters" }, { status: 400 });
+  }
+
+  try {
+    await sendTelegramThought(env, { noteId, sender, message });
+  } catch (error) {
+    if (error instanceof Error && error.message === "NOTE_NOT_FOUND") {
+      return json({ ok: false, error: "Note not found" }, { status: 404 });
+    }
+    return json({ ok: false, error: "Could not send thought right now" }, { status: 502 });
+  }
+
+  return json({ ok: true });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") {
@@ -114,6 +189,13 @@ export default {
     if (request.method === "POST" && editMatch) {
       const noteId = Number.parseInt(editMatch[1], 10);
       const response = await handleInternalEditApi(request, env, noteId);
+      return withCors(response, request);
+    }
+
+    const thoughtsMatch = url.pathname.match(/^\/api\/notes\/(\d+)\/thoughts$/);
+    if (request.method === "POST" && thoughtsMatch) {
+      const noteId = Number.parseInt(thoughtsMatch[1], 10);
+      const response = await handleThoughtsApi(request, env, noteId);
       return withCors(response, request);
     }
 

@@ -18,6 +18,14 @@ type NoteRow = {
   updated_at: string;
 };
 
+type NoteThoughtRow = {
+  id: number;
+  content: string;
+  created_at: string;
+  source_message_id: string | null;
+  source_chat_id: string | null;
+};
+
 type SessionRow = {
   user_id: string;
   state: SessionState;
@@ -108,6 +116,37 @@ export async function getRecentNotes(db: D1Database, limit: number): Promise<Not
     created_at: row.created_at,
     updated_at: row.updated_at,
   }));
+}
+
+export type NoteThoughtTarget = {
+  id: number;
+  content: string;
+  created_at: string;
+  source_message_id: string | null;
+  source_chat_id: string | null;
+};
+
+export async function getNoteThoughtTarget(db: D1Database, noteId: number): Promise<NoteThoughtTarget | null> {
+  const row = await db
+    .prepare(
+      `SELECT id, content, created_at, source_message_id, source_chat_id
+       FROM notes
+       WHERE id = ?`,
+    )
+    .bind(noteId)
+    .first<NoteThoughtRow>();
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: Number(row.id),
+    content: row.content,
+    created_at: row.created_at,
+    source_message_id: row.source_message_id,
+    source_chat_id: row.source_chat_id,
+  };
 }
 
 export async function getSession(db: D1Database, userId: string): Promise<TelegramSession | null> {

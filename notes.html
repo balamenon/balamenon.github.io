@@ -166,6 +166,79 @@
             word-break: break-word;
         }
 
+        .thoughts-wrap {
+            position: relative;
+            margin-top: 0.65rem;
+        }
+
+        .thought-trigger,
+        .thought-send,
+        .thought-cancel {
+            border: 1px solid #EBE7DE !important;
+            border-radius: 8px !important;
+            color: #2D2D2D !important;
+            margin: 0 !important;
+            padding: .1rem 1rem !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+            background: #EBE7DE !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+        }
+
+        .thought-trigger:hover,
+        .thought-send:hover,
+        .thought-cancel:hover {
+            text-decoration: underline !important;
+        }
+
+        .thought-callout {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: min(420px, calc(100vw - 6rem));
+            background: #FAF9F6;
+            border: 1px solid #e0dbcf;
+            border-radius: 10px;
+            box-shadow: 0 10px 22px rgba(60, 55, 43, 0.12);
+            padding: 0.75rem;
+            z-index: 30;
+            display: none;
+        }
+
+        .thought-callout.open {
+            display: block;
+        }
+
+        .thought-label {
+            display: block;
+            font-size: 0.86rem;
+            margin: 0.1rem 0 0.2rem;
+            color: #6b6359;
+            font-weight: 600;
+        }
+
+        .thought-callout input,
+        .thought-callout textarea {
+            width: 100%;
+            margin-bottom: 0.45rem;
+            border-color: #d9d2c6;
+            background: #fffdfa;
+            font-size: 0.94rem;
+        }
+
+        .thought-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.15rem;
+        }
+
+        .thought-feedback {
+            margin: 0.45rem 0 0;
+            font-size: 0.86rem;
+            color: #6b6359;
+        }
+
         .toggle-note {
             margin-top: 0.6rem;
             font-size: 0.9rem;
