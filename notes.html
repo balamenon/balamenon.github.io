@@ -224,15 +224,54 @@
 
             70% {
                 opacity: 0.8;
-                transform: translate(120px, -95px) scale(0.52);
+                transform: translate(var(--fly-x, 120px), var(--fly-y, -95px)) scale(0.52);
                 filter: blur(0.4px);
             }
 
             100% {
                 opacity: 0;
-                transform: translate(170px, -140px) scale(0.2);
+                transform: translate(var(--fly-x, 170px), var(--fly-y, -140px)) scale(0.2);
                 filter: blur(1px);
             }
+        }
+
+        .thought-toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 100;
+            max-width: min(360px, calc(100vw - 2rem));
+            background: #f7f4ee;
+            color: #2d2d2d;
+            border: 1px solid #d8d8d8;
+            border-radius: 10px;
+            padding: 0.55rem 0.75rem;
+            font-size: 0.92rem;
+            box-shadow: 0 8px 22px rgba(60, 55, 43, 0.16);
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+            pointer-events: none;
+            transition: opacity 180ms ease, transform 180ms ease;
+        }
+
+        .thought-toast.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .thought-toast.sending {
+            border-color: #d8d8d8;
+            background: #f7f4ee;
+        }
+
+        .thought-toast.sent {
+            border-color: #9fc6a7;
+            background: #eef8f0;
+        }
+
+        .thought-toast.failed {
+            border-color: #e2aaaa;
+            background: #fff1f1;
         }
 
         .thought-label {
@@ -312,6 +351,7 @@
     </main>
 
     <script src="/notes.js"></script>
+    <div id="thought-toast" class="thought-toast" aria-live="polite"></div>
 </body>
 
 </html>
