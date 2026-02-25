@@ -100,7 +100,7 @@ export default {
       return withCors(json({ ok: true }), request);
     }
 
-    if (request.method === "GET" && url.pathname === "/api/notes") {
+    if (request.method === "GET" && (url.pathname === "/api/notes" || url.pathname === "/notes")) {
       const response = await handleNotesApi(request, env);
       return withCors(response, request);
     }
