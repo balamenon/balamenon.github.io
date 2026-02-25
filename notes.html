@@ -297,6 +297,11 @@
             margin-top: 0.15rem;
         }
 
+        .thought-turnstile {
+            margin-top: 0.3rem;
+            margin-bottom: 0.35rem;
+        }
+
         .thought-feedback {
             margin: 0.45rem 0 0;
             font-size: 0.86rem;
@@ -373,7 +378,9 @@
 
     <script>
         window.NOTES_API_BASE = "https://bala-notes-worker.menon-bala.workers.dev";
+        window.TURNSTILE_SITE_KEY = "";
     </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 
 <body>
