@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "bala-notes-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-12-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bala_notes",
+      "database_id": "2d388371-fabf-4fff-8cda-00a356192702"
+    }
+  ],
+  "vars": {
+    "ALLOWED_TELEGRAM_ID": "6873032530"
+  }
+}
