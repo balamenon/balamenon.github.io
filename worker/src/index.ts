@@ -1,6 +1,6 @@
 import { consumeThoughtRateLimit, getAllNotes, getNoteThoughtTarget, updateNote } from "./db";
 import { MAX_NOTE_WORDS, countWords, paginateNotes } from "./logic";
-import { listCachedSubstackPosts, toJsonl } from "./substack";
+import { listCachedSubstackPosts } from "./substack";
 import { handleTelegramWebhook, type Env as TelegramEnv } from "./telegram";
 
 type Env = TelegramEnv & {
@@ -285,21 +285,6 @@ async function handleSubstackPostsApi(request: Request, env: Env): Promise<Respo
   });
 }
 
-async function handleSubstackJsonlApi(request: Request, env: Env): Promise<Response> {
-  const url = new URL(request.url);
-  const rawLimit = Number.parseInt(url.searchParams.get("limit") ?? "10", 10);
-  const limit = Number.isNaN(rawLimit) ? 10 : Math.max(1, Math.min(rawLimit, 20));
-  const posts = await listCachedSubstackPosts(env, limit);
-  const body = toJsonl(posts);
-
-  return new Response(body, {
-    headers: {
-      "content-type": "application/x-ndjson; charset=utf-8",
-      "cache-control": "public, max-age=300",
-    },
-  });
-}
-
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") {
@@ -328,11 +313,6 @@ export default {
 
     if (request.method === "GET" && url.pathname === "/api/substack/posts") {
       const response = await handleSubstackPostsApi(request, env);
-      return withCors(response, request, env);
-    }
-
-    if (request.method === "GET" && url.pathname === "/api/substack/posts.jsonl") {
-      const response = await handleSubstackJsonlApi(request, env);
       return withCors(response, request, env);
     }
 

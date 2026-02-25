@@ -1,4 +1,4 @@
-import { getSubstackPosts, replaceSubstackPosts, type StoredSubstackPost } from "./db";
+import { getSubstackPosts, upsertSubstackPosts, type StoredSubstackPost } from "./db";
 
 export type SubstackEnv = {
   DB: D1Database;
@@ -10,6 +10,7 @@ export type SubstackPost = {
   link: string;
   description: string;
   pub_date: string;
+  published_at: number;
 };
 
 function decodeXmlEntities(text: string): string {
@@ -56,6 +57,7 @@ function parseRssItems(xml: string, limit?: number): SubstackPost[] {
       link,
       description,
       pub_date: pubDate,
+      published_at: Date.parse(pubDate) || 0,
     });
 
     if (safeLimit !== null && posts.length >= safeLimit) {
@@ -66,7 +68,7 @@ function parseRssItems(xml: string, limit?: number): SubstackPost[] {
   return posts;
 }
 
-export async function reindexSubstackPosts(env: SubstackEnv, limit?: number): Promise<{ feedUrl: string; count: number }> {
+export async function reindexSubstackPosts(env: SubstackEnv, limit?: number): Promise<{ feedUrl: string; count: number; posts: SubstackPost[] }> {
   const feedUrl = env.SUBSTACK_FEED_URL?.trim() || "https://ondeviceguy.substack.com/feed";
 
   const feedResponse = await fetch(feedUrl, {
@@ -81,27 +83,15 @@ export async function reindexSubstackPosts(env: SubstackEnv, limit?: number): Pr
 
   const feedText = await feedResponse.text();
   const posts = parseRssItems(feedText, limit);
-  await replaceSubstackPosts(env.DB, posts);
+  await upsertSubstackPosts(env.DB, posts);
 
   return {
     feedUrl,
     count: posts.length,
+    posts,
   };
 }
 
 export async function listCachedSubstackPosts(env: SubstackEnv, limit = 10): Promise<StoredSubstackPost[]> {
   return getSubstackPosts(env.DB, limit);
-}
-
-export function toJsonl(posts: StoredSubstackPost[]): string {
-  return posts
-    .map((post) =>
-      JSON.stringify({
-        title: post.title,
-        link: post.link,
-        description: post.description,
-        pub_date: post.pub_date,
-      }),
-    )
-    .join("\n");
 }

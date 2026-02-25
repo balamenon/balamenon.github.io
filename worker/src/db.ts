@@ -27,11 +27,12 @@ type NoteThoughtRow = {
 };
 
 type SubstackPostRow = {
-  rank: number;
+  id: number;
   title: string;
   link: string;
   description: string;
   pub_date: string;
+  published_at: number;
   updated_at: string;
 };
 
@@ -226,31 +227,37 @@ export async function clearSession(db: D1Database, userId: string): Promise<void
 }
 
 export type StoredSubstackPost = {
-  rank: number;
+  id: number;
   title: string;
   link: string;
   description: string;
   pub_date: string;
+  published_at: number;
   updated_at: string;
 };
 
-export async function replaceSubstackPosts(
+export async function upsertSubstackPosts(
   db: D1Database,
-  posts: Array<{ title: string; link: string; description: string; pub_date: string }>,
+  posts: Array<{ title: string; link: string; description: string; pub_date: string; published_at: number }>,
 ): Promise<void> {
-  await db.batch([db.prepare(`DELETE FROM substack_posts`)]);
-
   if (!posts.length) {
     return;
   }
 
-  const statements = posts.map((post, index) =>
+  const statements = posts.map((post) =>
     db
       .prepare(
-        `INSERT INTO substack_posts (rank, title, link, description, pub_date)
-         VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO substack_posts (title, link, description, pub_date, published_at)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(link)
+         DO UPDATE SET
+           title = excluded.title,
+           description = excluded.description,
+           pub_date = excluded.pub_date,
+           published_at = excluded.published_at,
+           updated_at = (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
       )
-      .bind(index + 1, post.title, post.link, post.description, post.pub_date),
+      .bind(post.title, post.link, post.description, post.pub_date, post.published_at),
   );
 
   await db.batch(statements);
@@ -260,20 +267,21 @@ export async function getSubstackPosts(db: D1Database, limit: number): Promise<S
   const safeLimit = Math.max(1, Math.min(limit, 20));
   const result = await db
     .prepare(
-      `SELECT rank, title, link, description, pub_date, updated_at
+      `SELECT id, title, link, description, pub_date, published_at, updated_at
        FROM substack_posts
-       ORDER BY rank ASC
+       ORDER BY published_at DESC, updated_at DESC, id DESC
        LIMIT ?`,
     )
     .bind(safeLimit)
     .all<SubstackPostRow>();
 
   return (result.results ?? []).map((row) => ({
-    rank: Number(row.rank),
+    id: Number(row.id),
     title: row.title,
     link: row.link,
     description: row.description,
     pub_date: row.pub_date,
+    published_at: Number(row.published_at),
     updated_at: row.updated_at,
   }));
 }

@@ -7,7 +7,6 @@ This worker ingests Telegram notes and serves paginated notes for `notes.html`.
 - `POST /api/telegram/webhook`
 - `GET /api/notes?page=1&page_size=10&tz=UTC`
 - `GET /api/substack/posts?limit=10`
-- `GET /api/substack/posts.jsonl?limit=10`
 - `POST /api/notes/:id/edit` (internal bearer token)
 - `GET /api/health`
 
@@ -82,13 +81,19 @@ curl -X POST "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook" \
 - `/newnote <text>` creates a note
 - `/editnote` lists 20 recent notes with inline selection
 - `/deletenote` lists 20 recent notes with inline delete selection
-- `/reindex` refreshes cached Substack posts in D1
+- `/reindex` fetches Substack feed and upserts posts into D1 cache
 
 ## Security settings
 
 - `ALLOWED_ORIGINS` (`wrangler.jsonc` var): comma-separated origin allowlist for CORS.
 - `TURNSTILE_SECRET_KEY` (secret): enables bot-thought submission verification.
 - In `notes.html`, set `window.TURNSTILE_SITE_KEY` to your Turnstile site key to activate the widget.
+
+## Substack cache flow
+
+- Trigger `/reindex` in Telegram to refresh the D1 cache.
+- `index.html` should fetch `GET /api/substack/posts?limit=10` from the Worker.
+- Worker reads from cached D1 rows only (no feed fetch on page load).
 
 If text exceeds 10,000 words, the bot shows truncation preview and lets you save truncated content or cancel/edit.
 
