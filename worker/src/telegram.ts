@@ -1,5 +1,6 @@
 import { clearSession, deleteNote, getRecentNotes, getSession, insertNote, upsertSession, updateNote } from "./db";
 import { MAX_NOTE_WORDS, countWords, previewText, truncateToWords } from "./logic";
+import { reindexSubstackPosts } from "./substack";
 
 export interface Env {
   DB: D1Database;
@@ -158,7 +159,7 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
   }
 
   if (!text) {
-    await sendMessage(env, chatId, "Please send text. Use /newnote <text>, /editnote, or /deletenote.");
+    await sendMessage(env, chatId, "Please send text. Use /newnote <text>, /editnote, /deletenote, or /reindex.");
     return;
   }
 
@@ -217,6 +218,18 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
     return;
   }
 
+  if (/^\/reindex(?:@\w+)?$/.test(text)) {
+    await sendMessage(env, chatId, "Reindexing latest Substack posts...");
+    try {
+      const result = await reindexSubstackPosts(env, 10);
+      await sendMessage(env, chatId, `Reindex complete. Cached ${result.count} posts from ${result.feedUrl}.`);
+    } catch (error) {
+      console.error("Substack reindex failed:", error);
+      await sendMessage(env, chatId, "Reindex failed. Please try again in a moment.");
+    }
+    return;
+  }
+
   const session = await getSession(env.DB, userId);
   if (session?.state === "awaiting_edit_text" && session.selected_note_id) {
     const words = countWords(text);
@@ -230,7 +243,7 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
     return;
   }
 
-  await sendMessage(env, chatId, "Ignored. Use /newnote <text>, /editnote, or /deletenote.");
+  await sendMessage(env, chatId, "Ignored. Use /newnote <text>, /editnote, /deletenote, or /reindex.");
 }
 
 async function handleCallback(env: Env, callback: TelegramCallbackQuery): Promise<void> {

@@ -13,23 +13,87 @@
     
     <!--<link rel="stylesheet" href="simple.min.css">-->
     <script>
-        /**function redirect() {
-            //window.location = "https://ondeviceguy.substack.com";
-        }
-        redirect();**/
+        const CONTENT_API_BASE = "https://bala-notes-worker.menon-bala.workers.dev";
 
-        // Function to truncate text
         function truncateText(element, maxLength) {
             if (element.textContent.length > maxLength) {
                 element.textContent = element.textContent.substring(0, maxLength) + '...';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const elements = document.querySelectorAll('.truncate-single-line');
-            elements.forEach(element => {
-                truncateText(element, 85);
+        function renderWritingPosts(posts) {
+            const writingList = document.getElementById("writing-list");
+            if (!writingList) {
+                return;
+            }
+
+            writingList.innerHTML = "";
+
+            posts.forEach((post) => {
+                const li = document.createElement("li");
+                const p = document.createElement("p");
+                const a = document.createElement("a");
+                a.href = post.link;
+                a.textContent = post.title;
+
+                const br = document.createElement("br");
+                const code = document.createElement("code");
+                code.className = "truncate-single-line";
+                code.textContent = post.description || "Read on Substack";
+                truncateText(code, 85);
+
+                p.appendChild(a);
+                p.appendChild(br);
+                p.appendChild(code);
+                li.appendChild(p);
+                writingList.appendChild(li);
             });
+
+            const viewMoreLi = document.createElement("li");
+            const viewMoreP = document.createElement("p");
+            const viewMoreA = document.createElement("a");
+            viewMoreA.href = "https://ondeviceguy.substack.com";
+            viewMoreA.textContent = "View more ...";
+            viewMoreP.appendChild(viewMoreA);
+            viewMoreLi.appendChild(viewMoreP);
+            writingList.appendChild(viewMoreLi);
+        }
+
+        function parseJsonl(text) {
+            return text
+                .split('\n')
+                .map((line) => line.trim())
+                .filter((line) => line.length > 0)
+                .map((line) => JSON.parse(line));
+        }
+
+        async function syncSubstackPosts() {
+            const endpoint = `${CONTENT_API_BASE}/api/substack/posts.jsonl?limit=10`;
+            try {
+                const response = await fetch(endpoint, {
+                    headers: {
+                        "Accept": "application/x-ndjson, application/json;q=0.9"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Substack sync failed (${response.status})`);
+                }
+
+                const bodyText = await response.text();
+                const posts = parseJsonl(bodyText);
+                if (!Array.isArray(posts) || posts.length === 0) {
+                    throw new Error("No posts available");
+                }
+
+                renderWritingPosts(posts);
+            } catch (error) {
+                console.error("Could not sync Substack posts:", error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            syncSubstackPosts();
         });
     </script>
 
@@ -198,79 +262,9 @@
        
         <section>
             <h4 class="heading">Writing</h4>
-            <ul class="writing">
+            <ul class="writing" id="writing-list">
                 <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/india-needs-its-own-demand-generation">India needs its own demand generation engine</a><br /><code
-                            class="truncate-single-line">How to fix the Indian SaaS demand generation problem</code></p>
-                </li>
-
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/when-the-internet-stops-being-free">When The Internet
-                            Stops Being
-                            Free</a><br /><code
-                            class="truncate-single-line">Owning our data could rewire the internet</code></p>
-                </li>
-
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/what-the-hell-is-an-ai-business-model">What the hell
-                            is an AI business model when we’re all just tired of
-                            subscriptions?</a><br /><code
-                            class="truncate-single-line">On the exhausting grift of selling miracles, and how the real money gets made (it’s not how you think)</code>
-                    </p>
-                </li>
-
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/forget-ai-healthcares-real-problem">Forget AI.
-                            Healthcare’s real problem is way
-                            simpler</a><br /><code
-                            class="truncate-single-line">The trillion dollar problem hiding in your smartwatch</code>
-                    </p>
-                </li>
-
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/the-hidden-cost-of-always-choosing">The hidden cost
-                            of always choosing the cheapest option</a><br /><code
-                            class="truncate-single-line">Why minimizing cost often maximizes regret</code>
-                    </p>
-                </li>
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/the-internet-of-intelligence-a-thesis">The Internet
-                            of Intelligence: A Thesis and Playbook for Edge AI</a><br /><code
-                            class="truncate-single-line">The next computing platform isn’t in the cloud. It’s on every device you own. Here’s how to build it.</code>
-                    </p>
-                </li>
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/the-republics-guardrail">The Republic’s
-                            Guardrail</a><br /><code
-                            class="truncate-single-line">Why our future depends on the difference between a democracy and a constitutional republic</code>
-                    </p>
-                </li>
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/the-ai-monetization-blueprint-the">The AI
-                            Monetization Blueprint (the only one that works)</a><br /><code
-                            class="truncate-single-line">Charting the New Economy of Ads, Actions, and Agents</code></p>
-                </li>
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/the-permission-no-one-gave-me-and">The Permission No
-                            One Gave Me</a><br /><code
-                            class="truncate-single-line">And why that mattered</code></p>
-                </li>
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/a-promise-to-the-braver-you">A Promise to the Braver
-                            You</a><br /><code
-                            class="truncate-single-line">Persist.</code></p>
-                </li>
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/fiverr-could-make-the-robotaxi-for">Fiverr: the next
-                            assembly line for AI built products</a><br /><code
-                            class="truncate-single-line">They could build themselves into the Robotaxi equivalent for knowledge workers in tech.</code>
-                    </p>
-                </li>
-                <li>
-                    <p><a href="https://ondeviceguy.substack.com/p/ai-wont-make-money-selling-itself">AI won't make
-                            money selling itself, it'll make money selling you</a><br /><code
-                            class="truncate-single-line">Ads, actions, and agent-driven transactions will pay to keep NVIDIA and other GPU manufacturers alive.</code>
-                    </p>
+                    <p><code class="truncate-single-line">Loading latest posts from Substack...</code></p>
                 </li>
                 <li>
                     <p><a href="https://ondeviceguy.substack.com">View more ...</a></p>

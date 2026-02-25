@@ -26,6 +26,15 @@ type NoteThoughtRow = {
   source_chat_id: string | null;
 };
 
+type SubstackPostRow = {
+  rank: number;
+  title: string;
+  link: string;
+  description: string;
+  pub_date: string;
+  updated_at: string;
+};
+
 type SessionRow = {
   user_id: string;
   state: SessionState;
@@ -208,4 +217,57 @@ export async function upsertSession(
 
 export async function clearSession(db: D1Database, userId: string): Promise<void> {
   await db.prepare(`DELETE FROM telegram_sessions WHERE user_id = ?`).bind(userId).run();
+}
+
+export type StoredSubstackPost = {
+  rank: number;
+  title: string;
+  link: string;
+  description: string;
+  pub_date: string;
+  updated_at: string;
+};
+
+export async function replaceSubstackPosts(
+  db: D1Database,
+  posts: Array<{ title: string; link: string; description: string; pub_date: string }>,
+): Promise<void> {
+  await db.batch([db.prepare(`DELETE FROM substack_posts`)]);
+
+  if (!posts.length) {
+    return;
+  }
+
+  const statements = posts.map((post, index) =>
+    db
+      .prepare(
+        `INSERT INTO substack_posts (rank, title, link, description, pub_date)
+         VALUES (?, ?, ?, ?, ?)`,
+      )
+      .bind(index + 1, post.title, post.link, post.description, post.pub_date),
+  );
+
+  await db.batch(statements);
+}
+
+export async function getSubstackPosts(db: D1Database, limit: number): Promise<StoredSubstackPost[]> {
+  const safeLimit = Math.max(1, Math.min(limit, 20));
+  const result = await db
+    .prepare(
+      `SELECT rank, title, link, description, pub_date, updated_at
+       FROM substack_posts
+       ORDER BY rank ASC
+       LIMIT ?`,
+    )
+    .bind(safeLimit)
+    .all<SubstackPostRow>();
+
+  return (result.results ?? []).map((row) => ({
+    rank: Number(row.rank),
+    title: row.title,
+    link: row.link,
+    description: row.description,
+    pub_date: row.pub_date,
+    updated_at: row.updated_at,
+  }));
 }
