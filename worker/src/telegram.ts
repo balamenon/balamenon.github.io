@@ -221,7 +221,7 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
   if (/^\/reindex(?:@\w+)?$/.test(text)) {
     await sendMessage(env, chatId, "Reindexing latest Substack posts...");
     try {
-      const result = await reindexSubstackPosts(env, 10);
+      const result = await reindexSubstackPosts(env);
       await sendMessage(env, chatId, `Reindex complete. Cached ${result.count} posts from ${result.feedUrl}.`);
     } catch (error) {
       console.error("Substack reindex failed:", error);

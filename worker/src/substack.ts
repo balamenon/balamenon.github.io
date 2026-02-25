@@ -35,9 +35,10 @@ function extractTag(block: string, tagName: string): string {
   return match?.[1]?.trim() ?? "";
 }
 
-function parseRssItems(xml: string, limit: number): SubstackPost[] {
+function parseRssItems(xml: string, limit?: number): SubstackPost[] {
   const itemBlocks = Array.from(xml.matchAll(/<item\b[\s\S]*?<\/item>/gi)).map((match) => match[0]);
   const posts: SubstackPost[] = [];
+  const safeLimit = typeof limit === "number" ? Math.max(1, Math.min(limit, 5000)) : null;
 
   for (const block of itemBlocks) {
     const title = stripHtml(extractTag(block, "title"));
@@ -57,7 +58,7 @@ function parseRssItems(xml: string, limit: number): SubstackPost[] {
       pub_date: pubDate,
     });
 
-    if (posts.length >= limit) {
+    if (safeLimit !== null && posts.length >= safeLimit) {
       break;
     }
   }
@@ -65,8 +66,7 @@ function parseRssItems(xml: string, limit: number): SubstackPost[] {
   return posts;
 }
 
-export async function reindexSubstackPosts(env: SubstackEnv, limit = 10): Promise<{ feedUrl: string; count: number }> {
-  const safeLimit = Math.max(1, Math.min(limit, 20));
+export async function reindexSubstackPosts(env: SubstackEnv, limit?: number): Promise<{ feedUrl: string; count: number }> {
   const feedUrl = env.SUBSTACK_FEED_URL?.trim() || "https://ondeviceguy.substack.com/feed";
 
   const feedResponse = await fetch(feedUrl, {
@@ -80,7 +80,7 @@ export async function reindexSubstackPosts(env: SubstackEnv, limit = 10): Promis
   }
 
   const feedText = await feedResponse.text();
-  const posts = parseRssItems(feedText, safeLimit);
+  const posts = parseRssItems(feedText, limit);
   await replaceSubstackPosts(env.DB, posts);
 
   return {
