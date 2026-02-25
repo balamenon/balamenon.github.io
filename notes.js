@@ -166,6 +166,7 @@
       const wasOpen = callout.classList.contains("open");
       closeActiveThoughtCallout();
       if (!wasOpen) {
+        callout.classList.remove("sending");
         callout.classList.add("open");
         activeThoughtCallout = callout;
         senderInput.focus();
@@ -193,25 +194,36 @@
       }
 
       sendButton.disabled = true;
-      feedback.textContent = "Sending...";
+      callout.classList.add("sending");
 
-      try {
-        await submitThought(note.id, sender, message);
-        feedback.textContent = "Sent. Thank you.";
-        senderInput.value = "";
-        messageInput.value = "";
-        setTimeout(function () {
-          callout.classList.remove("open");
-          if (activeThoughtCallout === callout) {
-            activeThoughtCallout = null;
-          }
-          feedback.textContent = "";
-        }, 800);
-      } catch (error) {
-        feedback.textContent = error.message || "Could not send your thoughts.";
-      } finally {
+      const submittedSender = sender;
+      const submittedMessage = message;
+
+      senderInput.value = "";
+      messageInput.value = "";
+      feedback.textContent = "";
+
+      setTimeout(function () {
+        callout.classList.remove("open");
+        callout.classList.remove("sending");
+        if (activeThoughtCallout === callout) {
+          activeThoughtCallout = null;
+        }
         sendButton.disabled = false;
-      }
+      }, 430);
+
+      submitThought(note.id, submittedSender, submittedMessage)
+        .then(function () {
+          setStatus("Thought sent. Thank you.", false);
+          setTimeout(function () {
+            if (statusEl.textContent === "Thought sent. Thank you.") {
+              setStatus("", false);
+            }
+          }, 2200);
+        })
+        .catch(function (error) {
+          setStatus(error.message || "Could not send your thoughts.", true);
+        });
     });
 
     container.appendChild(trigger);
