@@ -59,6 +59,18 @@ export async function updateNote(db: D1Database, noteId: number, content: string
   return Number(result.meta.changes) > 0;
 }
 
+export async function deleteNote(db: D1Database, noteId: number): Promise<boolean> {
+  const result = await db
+    .prepare(
+      `DELETE FROM notes
+       WHERE id = ?`,
+    )
+    .bind(noteId)
+    .run();
+
+  return Number(result.meta.changes) > 0;
+}
+
 export async function getAllNotes(db: D1Database): Promise<NoteRecord[]> {
   const result = await db
     .prepare(

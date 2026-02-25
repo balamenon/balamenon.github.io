@@ -78,6 +78,7 @@ curl -X POST "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook" \
 
 - `/newnote <text>` creates a note
 - `/editnote` lists 20 recent notes with inline selection
+- `/deletenote` lists 20 recent notes with inline delete selection
 
 If text exceeds 10,000 words, the bot shows truncation preview and lets you save truncated content or cancel/edit.
 

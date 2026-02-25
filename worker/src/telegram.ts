@@ -1,4 +1,4 @@
-import { clearSession, getRecentNotes, getSession, insertNote, upsertSession, updateNote } from "./db";
+import { clearSession, deleteNote, getRecentNotes, getSession, insertNote, upsertSession, updateNote } from "./db";
 import { MAX_NOTE_WORDS, countWords, previewText, truncateToWords } from "./logic";
 
 export interface Env {
@@ -158,7 +158,7 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
   }
 
   if (!text) {
-    await sendMessage(env, chatId, "Please send text. Use /newnote <text> or /editnote.");
+    await sendMessage(env, chatId, "Please send text. Use /newnote <text>, /editnote, or /deletenote.");
     return;
   }
 
@@ -199,6 +199,24 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
     return;
   }
 
+  if (/^\/deletenote(?:@\w+)?$/.test(text)) {
+    const notes = await getRecentNotes(env.DB, 20);
+    if (!notes.length) {
+      await sendMessage(env, chatId, "No notes available to delete.");
+      return;
+    }
+
+    const keyboard = notes.map((note) => [
+      {
+        text: `Delete #${note.id} ${firstLine(note.content, 42)}`,
+        callback_data: `delete_select_${note.id}`,
+      },
+    ]);
+
+    await sendMessage(env, chatId, "Select a note to delete:", { inline_keyboard: keyboard });
+    return;
+  }
+
   const session = await getSession(env.DB, userId);
   if (session?.state === "awaiting_edit_text" && session.selected_note_id) {
     const words = countWords(text);
@@ -212,7 +230,7 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
     return;
   }
 
-  await sendMessage(env, chatId, "Ignored. Use /newnote <text> to create a note or /editnote to modify one.");
+  await sendMessage(env, chatId, "Ignored. Use /newnote <text>, /editnote, or /deletenote.");
 }
 
 async function handleCallback(env: Env, callback: TelegramCallbackQuery): Promise<void> {
@@ -307,6 +325,25 @@ async function handleCallback(env: Env, callback: TelegramCallbackQuery): Promis
       });
     }
     await answerCallback(env, callback.id, "Cancelled truncation. Send revised replacement text.");
+    return;
+  }
+
+  if (data.startsWith("delete_select_")) {
+    const noteId = Number(data.replace("delete_select_", ""));
+    if (!Number.isInteger(noteId) || noteId <= 0) {
+      await answerCallback(env, callback.id, "Invalid note selection.");
+      return;
+    }
+
+    const deleted = await deleteNote(env.DB, noteId);
+    if (!deleted) {
+      await answerCallback(env, callback.id, "Note no longer exists.");
+      await sendMessage(env, chatId, `Could not delete note #${noteId}; it may have already been removed.`);
+      return;
+    }
+
+    await answerCallback(env, callback.id, `Deleted note #${noteId}.`);
+    await sendMessage(env, chatId, `Deleted note #${noteId}.`);
     return;
   }
 
