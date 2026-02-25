@@ -8,14 +8,9 @@ CREATE TABLE IF NOT EXISTS substack_posts_v2 (
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
-INSERT INTO substack_posts_v2 (title, link, description, pub_date, published_at, updated_at)
+INSERT OR IGNORE INTO substack_posts_v2 (title, link, description, pub_date, published_at, updated_at)
 SELECT title, link, description, pub_date, 0, updated_at
-FROM substack_posts
-ON CONFLICT(link) DO UPDATE SET
-  title = excluded.title,
-  description = excluded.description,
-  pub_date = excluded.pub_date,
-  updated_at = excluded.updated_at;
+FROM substack_posts;
 
 DROP TABLE substack_posts;
 ALTER TABLE substack_posts_v2 RENAME TO substack_posts;
