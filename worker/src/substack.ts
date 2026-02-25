@@ -14,13 +14,25 @@ export type SubstackPost = {
 };
 
 function decodeXmlEntities(text: string): string {
-  return text
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+  const withoutCdata = text.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1");
+  const namedDecoded = withoutCdata
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
+
+  return namedDecoded
+    .replace(/&#(\d+);/g, (_, codePoint) => {
+      const value = Number.parseInt(codePoint, 10);
+      return Number.isFinite(value) ? String.fromCodePoint(value) : "";
+    })
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, codePointHex) => {
+      const value = Number.parseInt(codePointHex, 16);
+      return Number.isFinite(value) ? String.fromCodePoint(value) : "";
+    });
 }
 
 function stripHtml(text: string): string {
