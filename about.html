@@ -9,7 +9,7 @@
     <title>Bala Menon | Foundational Systems</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     
     <!--<link rel="stylesheet" href="simple.min.css">-->
     <script>
@@ -78,7 +78,17 @@
             border-bottom: 0 !important;
             grid-column: 2 !important;
             padding: 2rem 0 0 0 !important;
+            text-align: left !important;
+        }
 
+        .site-name {
+            margin: 0;
+            color: #2d2d2d;
+            font-family: "Playfair Display", Georgia, Cambria, "Times New Roman", serif;
+            font-size: clamp(2rem, 11cqi, 4.5rem) !important;
+            font-weight: 400;
+            letter-spacing: -0.03em;
+            line-height: 1;
         }
 
         .notice {
@@ -125,21 +135,95 @@
             padding: 0.5rem 0;
         }
 
-        nav>a {
-            border: 1px solid #EBE7DE !important;
-            border-radius: 8px !important;
-            color: #2D2D2D !important;
-            margin: 0 !important;
-            padding: .1rem 1rem !important;
-            text-decoration: none !important;
-            display: inline-block !important;
-            background: #EBE7DE !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
+        header nav {
+            padding: 0.6rem 0 0 !important;
+            display: flex !important;
+            flex-wrap: wrap;
+            gap: 0.15rem;
+            justify-content: flex-start !important;
         }
 
-        nav>a:hover {
-            text-decoration: underline !important;
+        header nav a,
+        header nav a:visited {
+            border: none !important;
+            border-radius: 6px !important;
+            color: #6b6560 !important;
+            margin: 0 !important;
+            padding: 0.35rem 0.7rem !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+            background: transparent !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif !important;
+            font-size: 14px !important;
+            font-weight: 450 !important;
+            letter-spacing: 0 !important;
+            transition: color 0.15s ease, background-color 0.15s ease !important;
+        }
+
+        header nav a:first-child {
+            margin-left: -0.7rem !important;
+        }
+
+        header nav a:hover {
+            color: #2d2d2d !important;
+            background-color: rgba(0, 0, 0, 0.04) !important;
+            text-decoration: none !important;
+        }
+
+        header nav a:focus-visible {
+            outline: 2px solid #2d2d2d;
+            outline-offset: 1px;
+        }
+
+        /* Footer */
+        body > footer {
+            border-top: 0.5px solid #e6e1d7;
+            text-align: left !important;
+            margin-top: 3.5rem;
+            padding: 1.5rem 0 2rem !important;
+            font-size: 0.875rem !important;
+            color: inherit !important;
+        }
+
+        .footer-nav {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 0.15rem;
+        }
+
+        .footer-nav a,
+        .footer-nav a:visited {
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            color: #9b958d;
+            text-decoration: none;
+            letter-spacing: 0;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            transition: color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .footer-nav a:first-child {
+            margin-left: -0.6rem;
+        }
+
+        .footer-nav a:hover {
+            color: #2d2d2d;
+            background-color: rgba(0, 0, 0, 0.04);
+            text-decoration: none !important;
+        }
+
+        .footer-nav a:focus-visible {
+            outline: 2px solid #2d2d2d;
+            outline-offset: 1px;
+        }
+
+        @media only screen and (width<=720px) {
+            .site-name {
+                font-size: clamp(2rem, 14vw, 3.2rem) !important;
+            }
         }
 
         h2 {
@@ -186,7 +270,7 @@
 
 <body>
     <header>
-        <h2>Bala Menon</h2>
+        <h2 class="site-name">Bala Menon</h2>
         <nav>
             <a href="/">Home</a>
             <a href="/about.html">About</a>
@@ -217,6 +301,14 @@ Connect: <a href="https://x.com/balabuilds">@balabuilds</a>
             </p>
         </section>
     </main>
+    <footer>
+        <nav class="footer-nav" aria-label="Footer navigation">
+            <a href="mailto:bala@ondevice.xyz">Email</a>
+            <a href="https://x.com/balabuilds" target="_blank" rel="noopener noreferrer">X</a>
+            <a href="https://ondeviceguy.substack.com" target="_blank" rel="noopener noreferrer">Substack</a>
+            <a href="https://balamenon.com/about.html" target="_blank" rel="noopener noreferrer">About</a>
+        </nav>
+    </footer>
 </body>
 
 </html>
