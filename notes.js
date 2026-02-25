@@ -14,8 +14,56 @@
     currentPage = 1;
   }
 
-  function escapeDate(dateUtc) {
-    return dateUtc;
+  function ordinalSuffix(day) {
+    const mod10 = day % 10;
+    const mod100 = day % 100;
+    if (mod10 === 1 && mod100 !== 11) return "st";
+    if (mod10 === 2 && mod100 !== 12) return "nd";
+    if (mod10 === 3 && mod100 !== 13) return "rd";
+    return "th";
+  }
+
+  function formatGroupDate(dateUtc) {
+    const parts = dateUtc.split("-");
+    if (parts.length !== 3) return dateUtc;
+
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+    if (!year || !month || !day) return dateUtc;
+
+    const monthName = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(year, month - 1, day)));
+
+    return `${day}${ordinalSuffix(day)} ${monthName} ${year}`;
+  }
+
+  function formatTimeAgo(isoTimestamp) {
+    const ts = Date.parse(isoTimestamp);
+    if (Number.isNaN(ts)) return isoTimestamp;
+
+    const diffSeconds = Math.floor((Date.now() - ts) / 1000);
+    if (diffSeconds < 45) return "a few seconds ago";
+    if (diffSeconds < 90) return "a minute ago";
+
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffMinutes < 45) return `${diffMinutes} minutes ago`;
+    if (diffMinutes < 90) return "an hour ago";
+
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffHours < 48) return "yesterday";
+
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 30) return `${diffDays} days ago`;
+
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12) return diffMonths === 1 ? "a month ago" : `${diffMonths} months ago`;
+
+    const diffYears = Math.floor(diffMonths / 12);
+    return diffYears === 1 ? "a year ago" : `${diffYears} years ago`;
   }
 
   function setStatus(text, isError) {
@@ -35,7 +83,9 @@
 
     const meta = document.createElement("p");
     meta.className = "note-meta";
-    meta.textContent = `#${note.id} | ${note.word_count} words | ${note.created_at}`;
+    const timeAgo = formatTimeAgo(note.created_at);
+    meta.textContent = `#${note.id} | ${note.word_count} words | ${timeAgo}`;
+    meta.title = note.created_at;
     article.appendChild(meta);
 
     const content = document.createElement("div");
@@ -88,7 +138,7 @@
       section.className = "day-group";
 
       const heading = document.createElement("h3");
-      heading.textContent = escapeDate(group.date_utc);
+      heading.textContent = formatGroupDate(group.date_utc);
       section.appendChild(heading);
 
       group.notes.forEach(function (note) {
