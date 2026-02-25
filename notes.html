@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes | Bala Menon</title>
+  <meta name="description" content="Personal notes captured through Telegram and displayed with UTC day grouping." />
+  <link rel="stylesheet" href="/simple.min.css" />
+  <style>
+    body {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    nav a {
+      border: 1px solid var(--border);
+      border-radius: var(--standard-border-radius);
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.2rem 0.8rem;
+    }
+
+    nav a.current {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .notes-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+
+    #notes-status.error {
+      color: #b00020;
+    }
+
+    .day-group {
+      margin: 2rem 0;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+
+    .note-item {
+      margin: 1rem 0;
+    }
+
+    .note-meta {
+      color: var(--text-light);
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .note-content p {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .toggle-note {
+      margin-top: 0.5rem;
+    }
+
+    .empty-state {
+      color: var(--text-light);
+      margin-top: 2rem;
+    }
+  </style>
+  <script>
+    // Set this to your deployed worker URL, e.g. https://bala-notes-worker.<subdomain>.workers.dev
+    // window.NOTES_API_BASE = "";
+  </script>
+</head>
+
+<body>
+  <header>
+    <h2>Bala Menon</h2>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/notes.html" class="current" aria-current="page">Notes</a>
+      <a href="https://x.com/balabuilds">Follow on X</a>
+    </nav>
+  </header>
+
+  <main>
+    <h3>Notes</h3>
+    <p>Notes are grouped by UTC day and paginated with a 10-note cap per page.</p>
+
+    <div class="notes-toolbar">
+      <button id="prev-page" type="button">Previous</button>
+      <span id="page-label">Page 1</span>
+      <button id="next-page" type="button">Next</button>
+      <button id="retry-button" type="button">Retry</button>
+    </div>
+
+    <p id="notes-status" aria-live="polite"></p>
+
+    <div id="notes-root"></div>
+  </main>
+
+  <script src="/notes.js"></script>
+</body>
+
+</html>
