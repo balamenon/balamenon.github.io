@@ -162,17 +162,18 @@
                     meta.appendChild(date);
                 }
 
+                main.appendChild(title);
+                main.appendChild(desc);
+                main.appendChild(meta);
+
                 const arrow = document.createElement("span");
                 arrow.className = "writing-arrow";
                 arrow.textContent = "→";
                 arrow.setAttribute("aria-hidden", "true");
-                meta.appendChild(arrow);
 
-                main.appendChild(title);
-                main.appendChild(desc);
-                main.appendChild(meta);
                 cardLink.appendChild(leading);
                 cardLink.appendChild(main);
+                cardLink.appendChild(arrow);
                 article.appendChild(cardLink);
                 li.appendChild(article);
                 writingList.appendChild(li);
@@ -250,7 +251,7 @@
             margin: 0.4rem 0 0;
             padding: 0;
             display: grid;
-            gap: 0.8rem;
+            gap: 0.52rem;
         }
 
         .writing-item {
@@ -273,7 +274,9 @@
             gap: 0.4rem 0.85rem;
             color: inherit;
             text-decoration: none;
-            padding: 1rem 1rem 1rem 0.85rem;
+            padding: 0.74rem 0.78rem 0.74rem 0.72rem;
+            position: relative;
+            min-height: 5.2rem;
         }
 
         .writing-card:hover,
@@ -307,19 +310,16 @@
 
         .writing-main {
             min-width: 0;
+            padding-right: 3rem;
         }
 
         .writing-title {
-            margin: 0 0 0.28rem;
+            margin: 0 0 0.2rem;
             color: #C2410C;
-            font-size: 1.2rem;
+            font-size: 1.17rem;
             line-height: 1.3;
             font-weight: 650;
             letter-spacing: -0.01em;
-        }
-
-        .writing-card-link:hover .writing-title {
-            text-decoration: underline;
         }
 
         .writing-card-link:focus-visible,
@@ -331,17 +331,17 @@
 
         .writing-description {
             margin: 0;
-            font-size: 0.97rem;
-            line-height: 1.55;
+            font-size: 0.95rem;
+            line-height: 1.45;
             color: #4d4b46;
         }
 
         .writing-meta {
-            margin-top: 0.55rem;
+            margin-top: 0.4rem;
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 0.45rem;
+            gap: 0.36rem;
         }
 
         .writing-source,
@@ -363,20 +363,34 @@
         }
 
         .writing-arrow {
-            margin-left: auto;
-            font-size: 1.05rem;
+            position: absolute;
+            right: 0.72rem;
+            top: 50%;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
             line-height: 1;
             font-weight: 700;
-            color: #C2410C;
+            color: rgba(255, 255, 255, 0.92);
+            background: rgba(194, 65, 12, 0.6);
+            backdrop-filter: blur(2px);
             opacity: 0;
-            transform: translateX(-6px);
-            transition: opacity .18s ease, transform .18s ease;
+            transform: translateY(-50%) translateX(-7px) scale(0.92);
+            transition: opacity .18s ease, transform .18s ease, background-color .18s ease;
         }
 
         .writing-card-link:hover .writing-arrow,
         .writing-card-link:focus-visible .writing-arrow {
             opacity: 1;
-            transform: translateX(0);
+            transform: translateY(-50%) translateX(0) scale(1);
+        }
+
+        .writing-card-link:hover .writing-arrow {
+            background: rgba(194, 65, 12, 0.76);
         }
 
         .writing-sync-note {
@@ -594,7 +608,8 @@
             .writing-card-link,
             .writing-card-link:visited {
                 grid-template-columns: 1fr;
-                padding: 0.85rem;
+                padding: 0.72rem 0.72rem 0.75rem;
+                min-height: 0;
             }
 
             .writing-leading {
@@ -606,8 +621,14 @@
                 gap: 0.38rem;
             }
 
+            .writing-main {
+                padding-right: 0;
+            }
+
             .writing-arrow {
-                margin-left: 0;
+                right: 0.58rem;
+                width: 1.85rem;
+                height: 1.85rem;
             }
 
             .writing-title {
