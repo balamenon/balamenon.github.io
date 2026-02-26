@@ -72,7 +72,7 @@
             --gBr: #C2410C;
             --gDes: #2D2D2D;
             --JKqx2: #C2410C;
-            --sans-font: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir, "Nimbus Sans L", Roboto, "Noto Sans", "Segoe UI", Arial, Helvetica, "Helvetica Neue", sans-serif !important;
+            --sans-font: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
         }
 
         header {
@@ -89,8 +89,6 @@
             align-items: flex-end;
             gap: 0;
             flex-wrap: nowrap;
-            max-width: 100%;
-            overflow: visible;
         }
 
         .site-name {
@@ -251,17 +249,20 @@
         header nav a,
         header nav a:visited {
             border: none !important;
-            border-radius: 6px !important;
+            border-radius: 8px !important;
             color: #6b6560 !important;
             margin: 0 !important;
-            padding: 0.35rem 0.7rem !important;
+            padding: 0 0.8rem !important;
+            min-height: 44px !important;
             text-decoration: none !important;
-            display: inline-block !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
             background: transparent !important;
-            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif !important;
-            font-size: 14px !important;
-            font-weight: 450 !important;
-            letter-spacing: 0 !important;
+            font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+            font-size: 15px !important;
+            font-weight: 500 !important;
+            letter-spacing: -0.01em !important;
             transition: color 0.15s ease, background-color 0.15s ease !important;
         }
 
@@ -299,14 +300,18 @@
 
         .footer-nav a,
         .footer-nav a:visited {
-            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
-            font-size: 13px;
-            font-weight: 400;
+            font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
             color: #9b958d;
             text-decoration: none;
-            letter-spacing: 0;
-            padding: 0.3rem 0.6rem;
-            border-radius: 6px;
+            letter-spacing: -0.01em;
+            padding: 0 0.8rem;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
             transition: color 0.15s ease, background-color 0.15s ease;
         }
 
@@ -328,7 +333,6 @@
         @media only screen and (width<=720px) {
             .site-identity {
                 display: block;
-                overflow: hidden;
             }
 
             .site-name {
