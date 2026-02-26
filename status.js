@@ -1,4 +1,8 @@
 (function () {
+  var relativeTime = typeof Intl !== "undefined" && typeof Intl.RelativeTimeFormat === "function" ? new Intl.RelativeTimeFormat("en", { numeric: "auto" }) : null;
+  var lastUpdatedAt = null;
+  var refreshTimer = null;
+
   function getApiBase() {
     var configured = (window.SITE_API_BASE || window.NOTES_API_BASE || "").trim();
     if (configured) {
@@ -7,17 +11,92 @@
     return window.location.origin;
   }
 
-  function renderStatus(text) {
-    var targets = document.querySelectorAll("[data-site-status]");
-    targets.forEach(function (el) {
-      if (!text) {
-        el.textContent = "";
-        el.hidden = true;
-        return;
+  function formatUpdatedTime(updatedAt) {
+    if (!updatedAt) {
+      return "";
+    }
+
+    var updatedMs = Date.parse(updatedAt);
+    if (Number.isNaN(updatedMs)) {
+      return "";
+    }
+
+    var deltaSeconds = Math.round((Date.now() - updatedMs) / 1000);
+    if (deltaSeconds < 45) {
+      return "updated just now";
+    }
+
+    var units = [
+      { name: "year", seconds: 31536000 },
+      { name: "month", seconds: 2592000 },
+      { name: "day", seconds: 86400 },
+      { name: "hour", seconds: 3600 },
+      { name: "minute", seconds: 60 }
+    ];
+
+    for (var i = 0; i < units.length; i += 1) {
+      var unit = units[i];
+      if (deltaSeconds >= unit.seconds) {
+        var value = Math.floor(deltaSeconds / unit.seconds);
+        if (relativeTime) {
+          return "updated " + relativeTime.format(-value, unit.name);
+        }
+        return "updated " + value + " " + unit.name + (value === 1 ? " ago" : "s ago");
       }
+    }
+
+    return "updated just now";
+  }
+
+  function renderStatus(text, updatedAt) {
+    var containers = document.querySelectorAll("[data-site-status-container]");
+    var bubbles = document.querySelectorAll("[data-site-status]");
+    var meta = document.querySelectorAll("[data-site-status-updated]");
+
+    if (!text) {
+      containers.forEach(function (el) {
+        el.hidden = true;
+      });
+      bubbles.forEach(function (el) {
+        el.textContent = "";
+      });
+      meta.forEach(function (el) {
+        el.textContent = "";
+      });
+      lastUpdatedAt = null;
+      return;
+    }
+
+    bubbles.forEach(function (el) {
       el.textContent = text;
+    });
+
+    var label = formatUpdatedTime(updatedAt);
+    meta.forEach(function (el) {
+      el.textContent = label;
+    });
+
+    containers.forEach(function (el) {
       el.hidden = false;
     });
+
+    lastUpdatedAt = updatedAt || null;
+  }
+
+  function startRefreshTimer() {
+    if (refreshTimer !== null) {
+      return;
+    }
+    refreshTimer = window.setInterval(function () {
+      if (!lastUpdatedAt) {
+        return;
+      }
+      var label = formatUpdatedTime(lastUpdatedAt);
+      var meta = document.querySelectorAll("[data-site-status-updated]");
+      meta.forEach(function (el) {
+        el.textContent = label;
+      });
+    }, 60000);
   }
 
   async function loadStatus() {
@@ -33,7 +112,9 @@
     }
 
     var statusText = typeof payload.status === "string" ? payload.status.replace(/\s+/g, " ").trim() : "";
-    renderStatus(statusText);
+    var updatedAt = typeof payload.updated_at === "string" ? payload.updated_at : "";
+    renderStatus(statusText, updatedAt);
+    startRefreshTimer();
   }
 
   if (document.readyState === "loading") {
