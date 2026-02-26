@@ -351,7 +351,7 @@
       callout.style.setProperty("--fly-x", deltaX + "px");
       callout.style.setProperty("--fly-y", deltaY + "px");
       
-      showStatusToast("sending", "Sending your thought...", 0);
+      showStatusToast("sending", "Sending your reply...", 0);
 
       var submittedMessage = message;
       textarea.value = "";
@@ -364,18 +364,17 @@
         if (activeReplyCallout === callout) {
           activeReplyCallout = null;
         }
+        sendBtn.disabled = false;
       }, 430);
 
       submitStatusReply(submittedMessage, token)
         .then(function () {
-          showStatusToast("sent", "Sent. Thank you.", 2400);
+          showStatusToast("sent", "Reply sent. Thank you.", 2400);
         })
         .catch(function (error) {
           showStatusToast("failed", (error && error.message) || "Could not send reply.", 3200);
-          feedback.textContent = (error && error.message) || "Could not send reply.";
         })
         .finally(function () {
-          sendBtn.disabled = false;
           if (turnstileWidgetId !== null && window.turnstile && typeof window.turnstile.reset === "function") {
             window.turnstile.reset(turnstileWidgetId);
           }
