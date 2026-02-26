@@ -42,6 +42,9 @@
         }
 
         .site-name {
+            display: inline-flex;
+            align-items: flex-start;
+            gap: 0.08em;
             margin: 0;
             color: #2d2d2d;
             font-family: "Playfair Display", Georgia, Cambria, "Times New Roman", serif;
@@ -52,20 +55,49 @@
         }
 
         .site-status-bubble {
+            position: relative;
             display: inline-block;
-            margin-left: 0.5rem;
-            padding: 0.22rem 0.6rem;
-            border: 1px solid #d6c7af;
-            border-radius: 999px;
-            background: #f7f0e5;
-            color: #5f3b14;
-            font-size: 0.92rem;
+            margin-top: 0.22em;
+            margin-left: 0;
+            padding: 0.45rem 0.82rem 0.5rem;
+            border: 1px solid #d8c4a8;
+            border-radius: 1.35rem;
+            background: #fffbf3;
+            box-shadow: 0 4px 12px rgba(95, 59, 20, 0.12);
+            color: #3f2912;
+            font-size: clamp(0.84rem, 1.4vw, 1.02rem);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
             font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir, "Nimbus Sans L", Roboto, "Noto Sans", "Segoe UI", Arial, Helvetica, "Helvetica Neue", sans-serif;
-            vertical-align: middle;
-            max-width: min(80vw, 36rem);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            max-width: min(35ch, 74vw);
+            white-space: normal;
+            text-wrap: balance;
+            overflow-wrap: anywhere;
+        }
+
+        .site-status-bubble::before {
+            content: "";
+            position: absolute;
+            left: -0.62rem;
+            bottom: 0.44rem;
+            width: 0.54rem;
+            height: 0.54rem;
+            border: 1px solid #d8c4a8;
+            border-radius: 50%;
+            background: #fffbf3;
+        }
+
+        .site-status-bubble::after {
+            content: "";
+            position: absolute;
+            left: -1rem;
+            bottom: 0.18rem;
+            width: 0.34rem;
+            height: 0.34rem;
+            border: 1px solid #d8c4a8;
+            border-radius: 50%;
+            background: #fffbf3;
         }
 
         a {
@@ -136,6 +168,11 @@
         @media only screen and (width<=720px) {
             .site-name {
                 font-size: clamp(2rem, 14vw, 3.2rem) !important;
+            }
+
+            .site-status-bubble {
+                margin-top: 0.35em;
+                max-width: min(28ch, 86vw);
             }
         }
 
@@ -490,7 +527,7 @@
 
 <body>
     <header>
-        <h2 class="site-name">Bala Menon <span class="site-status-bubble" data-site-status hidden></span></h2>
+        <h2 class="site-name">Bala Menon<span class="site-status-bubble" data-site-status hidden></span></h2>
         <nav>
             <a href="/">Home</a>
             <a href="/about.html">About</a>
