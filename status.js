@@ -30,7 +30,8 @@
       ".status-reply-send,.status-reply-cancel{border:1px solid #ebe7de!important;border-radius:8px!important;padding:.14rem .78rem!important;font-size:14px!important;font-weight:500!important;cursor:pointer;color:#2d2d2d!important;background:#ebe7de!important;appearance:none;-webkit-appearance:none}" +
       ".status-reply-send:hover,.status-reply-cancel:hover,.status-reply-send:focus-visible,.status-reply-cancel:focus-visible{border-color:#ddd4c5!important;background:#ddd4c5!important;color:#2d2d2d!important;text-decoration:underline}" +
       ".status-reply-feedback{margin:.35rem 0 0;font-size:.84rem;color:#6b6359;min-height:1.1em}" +
-      ".status-reply-turnstile{margin-top:.25rem;margin-bottom:.3rem;min-height:65px}";
+      ".status-reply-turnstile{margin-top:.25rem;margin-bottom:.3rem;min-height:65px}" +
+      "@media only screen and (max-width:720px){.status-reply-trigger{width:2.2rem;height:2.2rem;border-color:#d4c8b2!important;background:#f3ede2!important}.status-reply-trigger svg{width:16px;height:16px}}";
     document.head.appendChild(style);
   }
 
