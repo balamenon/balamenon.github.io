@@ -17,7 +17,7 @@
     style.textContent =
       ".site-status-wrap{position:relative}" +
       ".status-bubble-row{position:relative;display:inline-flex;align-items:center}" +
-      ".status-reply-trigger{position:absolute;top:50%;right:-2.15rem;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:1.7rem;height:1.7rem;border-radius:999px;border:1px solid #d2c1a7!important;background:#d2c1a7!important;color:#fff!important;cursor:pointer;padding:0;line-height:1;transition:transform .16s ease,box-shadow .16s ease;appearance:none}" +
+      ".status-reply-trigger{position:absolute;top:50%;right:-2.15rem;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:1.7rem;height:1.7rem;border-radius:999px;border:1px solid #d2c1a7!important;background:#f3ede2!important;color:#5a4026!important;cursor:pointer;padding:0;line-height:1;transition:transform .16s ease,box-shadow .16s ease;appearance:none}" +
       ".status-reply-trigger:hover,.status-reply-trigger:focus-visible{transform:translateY(calc(-50% - 1px));box-shadow:0 4px 10px rgba(88,72,48,.18);border-color:#c4ad8c!important;background:#c4ad8c!important;color:#fff!important}" +
       ".status-reply-trigger[hidden]{display:none}" +
       ".status-reply-callout{position:absolute;top:calc(100% + .45rem);left:0;z-index:35;width:min(320px,calc(100vw - 3rem));padding:.62rem;border-radius:10px;border:1px solid #e0dbcf;background:#faf9f6;display:none;box-shadow:0 10px 22px rgba(60,55,43,.12)}" +
