@@ -16,20 +16,19 @@
     style.id = "status-reply-styles";
     style.textContent =
       ".site-status-wrap{position:relative}" +
-      ".status-bubble-row{display:inline-flex;align-items:center;gap:.45rem;flex-wrap:wrap}" +
-      ".status-reply-trigger{display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-radius:999px;border:1px solid rgba(255,255,255,.32);background:rgba(14,18,22,.72);color:#f5f7ff;cursor:pointer;padding:0;line-height:1;transition:transform .16s ease,background .16s ease,border-color .16s ease}" +
-      ".status-reply-trigger:hover{transform:translateY(-1px);background:rgba(20,26,32,.9);border-color:rgba(255,255,255,.55)}" +
+      ".status-bubble-row{position:relative;display:inline-flex;align-items:center}" +
+      ".status-reply-trigger{position:absolute;top:50%;right:-2.15rem;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:1.7rem;height:1.7rem;border-radius:999px;border:1px solid #d2c1a7;background:#f3ede2;color:#5a4026;cursor:pointer;padding:0;line-height:1;transition:transform .16s ease,box-shadow .16s ease}" +
+      ".status-reply-trigger:hover{transform:translateY(calc(-50% - 1px));box-shadow:0 4px 10px rgba(88,72,48,.18)}" +
       ".status-reply-trigger[hidden]{display:none}" +
-      ".status-reply-callout{position:absolute;top:calc(100% + .45rem);left:0;z-index:35;width:min(420px,86vw);padding:.72rem;border-radius:.75rem;border:1px solid rgba(255,255,255,.16);background:rgba(9,13,18,.95);backdrop-filter:blur(8px);display:none;box-shadow:0 16px 38px rgba(0,0,0,.35)}" +
+      ".status-reply-callout{position:absolute;top:calc(100% + .45rem);left:0;z-index:35;width:min(320px,calc(100vw - 3rem));padding:.62rem;border-radius:10px;border:1px solid #e0dbcf;background:#faf9f6;display:none;box-shadow:0 10px 22px rgba(60,55,43,.12)}" +
       ".status-reply-callout.open{display:block}" +
-      ".status-reply-textarea{width:100%;resize:vertical;min-height:88px;border-radius:.56rem;border:1px solid rgba(255,255,255,.17);padding:.58rem .62rem;background:rgba(255,255,255,.96);color:#111926;font:inherit}" +
-      ".status-reply-textarea:focus{outline:none;border-color:rgba(84,197,255,.8);box-shadow:0 0 0 2px rgba(84,197,255,.24)}" +
-      ".status-reply-actions{display:flex;gap:.45rem;margin-top:.55rem}" +
-      ".status-reply-send,.status-reply-cancel{border:0;border-radius:.52rem;padding:.38rem .64rem;font:inherit;cursor:pointer}" +
-      ".status-reply-send{background:#e9f3ff;color:#0f2134}" +
-      ".status-reply-cancel{background:rgba(255,255,255,.16);color:#eff5ff}" +
-      ".status-reply-feedback{margin:.42rem 0 0;font-size:.84rem;color:#ffd9d9;min-height:1.2em}" +
-      ".status-reply-turnstile{margin-top:.55rem;min-height:65px}";
+      ".status-reply-textarea{width:100%;resize:vertical;min-height:56px;max-height:140px;border-radius:8px;border:1px solid #d9d2c6;padding:.45rem .52rem;background:#fffdfa;color:#2d2d2d;font:inherit;font-size:.92rem;line-height:1.35}" +
+      ".status-reply-textarea:focus{outline:none;border-color:#cdb894;box-shadow:0 0 0 2px rgba(205,184,148,.22)}" +
+      ".status-reply-actions{display:flex;gap:.45rem;margin-top:.2rem}" +
+      ".status-reply-send,.status-reply-cancel{border:1px solid #ebe7de;border-radius:8px;padding:.14rem .78rem;font-size:14px;font-weight:500;cursor:pointer;color:#2d2d2d;background:#ebe7de}" +
+      ".status-reply-send:hover,.status-reply-cancel:hover{text-decoration:underline}" +
+      ".status-reply-feedback{margin:.35rem 0 0;font-size:.84rem;color:#6b6359;min-height:1.1em}" +
+      ".status-reply-turnstile{margin-top:.25rem;margin-bottom:.3rem;min-height:65px}";
     document.head.appendChild(style);
   }
 
