@@ -83,36 +83,45 @@
             text-align: left !important;
         }
 
-        .site-name {
-            display: inline-flex;
+        .site-identity {
+            display: flex;
             align-items: flex-start;
-            gap: 0.08em;
+            gap: 0.22rem;
+            flex-wrap: wrap;
+        }
+
+        .site-name {
             margin: 0;
             color: #2d2d2d;
             font-family: "Playfair Display", Georgia, Cambria, "Times New Roman", serif;
             font-size: clamp(2rem, 11cqi, 4.5rem) !important;
             font-weight: 400;
             letter-spacing: -0.03em;
-            line-height: 1;
+            line-height: 0.95;
+        }
+
+        .site-status-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: 0.42rem;
         }
 
         .site-status-bubble {
             position: relative;
             display: inline-block;
-            margin-top: 0.22em;
-            margin-left: 0;
-            padding: 0.45rem 0.82rem 0.5rem;
+            padding: 0.4rem 0.78rem 0.44rem;
             border: 1px solid #d8c4a8;
             border-radius: 1.35rem;
             background: #fffbf3;
             box-shadow: 0 4px 12px rgba(95, 59, 20, 0.12);
             color: #3f2912;
-            font-size: clamp(0.84rem, 1.4vw, 1.02rem);
-            font-weight: 600;
+            font-size: clamp(0.76rem, 1.15vw, 0.92rem);
+            font-weight: 560;
             letter-spacing: -0.01em;
-            line-height: 1.2;
+            line-height: 1.22;
             font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir, "Nimbus Sans L", Roboto, "Noto Sans", "Segoe UI", Arial, Helvetica, "Helvetica Neue", sans-serif;
-            max-width: min(35ch, 74vw);
+            max-width: min(34ch, 72vw);
             white-space: normal;
             text-wrap: balance;
             overflow-wrap: anywhere;
@@ -140,6 +149,15 @@
             border: 1px solid #d8c4a8;
             border-radius: 50%;
             background: #fffbf3;
+        }
+
+        .site-status-meta {
+            margin: 0.22rem 0 0 0.2rem;
+            color: #a39c93;
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+            font-size: 0.72rem;
+            line-height: 1;
+            letter-spacing: 0.01em;
         }
 
         .notice {
@@ -272,13 +290,29 @@
         }
 
         @media only screen and (width<=720px) {
+            .site-identity {
+                display: block;
+            }
+
             .site-name {
                 font-size: clamp(2rem, 14vw, 3.2rem) !important;
             }
 
+            .site-status-wrap {
+                margin-top: 0.05rem;
+                margin-left: 0.2rem;
+            }
+
             .site-status-bubble {
-                margin-top: 0.35em;
-                max-width: min(28ch, 86vw);
+                max-width: min(24ch, 70vw);
+                font-size: clamp(0.74rem, 3.35vw, 0.9rem);
+                padding: 0.36rem 0.72rem 0.4rem;
+            }
+
+            .site-status-meta {
+                margin-top: 0.18rem;
+                margin-left: 0.14rem;
+                font-size: 0.66rem;
             }
         }
 
@@ -329,7 +363,13 @@
 
 <body>
     <header>
-        <h2 class="site-name">Bala Menon<span class="site-status-bubble" data-site-status hidden></span></h2>
+        <div class="site-identity">
+            <h2 class="site-name">Bala Menon</h2>
+            <div class="site-status-wrap" data-site-status-container hidden>
+                <span class="site-status-bubble" data-site-status></span>
+                <p class="site-status-meta" data-site-status-updated></p>
+            </div>
+        </div>
         <nav>
             <a href="/">Home</a>
             <a href="/about.html">About</a>
