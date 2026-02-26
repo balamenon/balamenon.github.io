@@ -32,7 +32,7 @@
       return;
     }
 
-    var statusText = typeof payload.status === "string" ? payload.status.trim() : "";
+    var statusText = typeof payload.status === "string" ? payload.status.replace(/\s+/g, " ").trim() : "";
     renderStatus(statusText);
   }
 
