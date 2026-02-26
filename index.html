@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://bala-notes-worker.menon-bala.workers.dev; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="description" content="Bala Menon engineers foundational systems. Previously: Infrastructure for Media, Fintech, and Space. Now: Ondevice—The protocol for sovereign, local AI.">
     <meta name="keywords" content="Bala Menon, Zero to One, Sovereign AI, Local Intelligence, Distributed Systems, Deep Tech, Protocol, Privacy Infrastructure, System Architecture">
     <title>Bala Menon | Foundational Systems</title>
@@ -103,13 +105,33 @@
 
             writingList.innerHTML = "";
 
+            function toSafeExternalUrl(value) {
+                if (typeof value !== "string" || value.trim() === "") {
+                    return null;
+                }
+                try {
+                    const parsed = new URL(value);
+                    if (parsed.protocol !== "https:") {
+                        return null;
+                    }
+                    return parsed.toString();
+                } catch {
+                    return null;
+                }
+            }
+
             posts.forEach((post, index) => {
+                const safeLink = toSafeExternalUrl(post.link);
+                if (!safeLink) {
+                    return;
+                }
+
                 const li = document.createElement("li");
                 li.className = "writing-item";
 
                 const rowLink = document.createElement("a");
                 rowLink.className = "writing-row";
-                rowLink.href = post.link;
+                rowLink.href = safeLink;
                 rowLink.target = "_blank";
                 rowLink.rel = "noopener noreferrer";
                 rowLink.setAttribute("aria-label", `Open article: ${post.title}`);
