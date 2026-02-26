@@ -31,7 +31,7 @@
       ".status-reply-send:hover,.status-reply-cancel:hover,.status-reply-send:focus-visible,.status-reply-cancel:focus-visible{border-color:#ddd4c5!important;background:#ddd4c5!important;color:#2d2d2d!important;text-decoration:underline}" +
       ".status-reply-feedback{margin:.35rem 0 0;font-size:.84rem;color:#6b6359;min-height:1.1em}" +
       ".status-reply-turnstile{margin-top:.25rem;margin-bottom:.3rem;min-height:65px}" +
-      "@media only screen and (max-width:720px){.status-reply-trigger{border-color:#d4c8b2!important;background:#f3ede2!important;padding:0.25rem 0.65rem;font-size:0.82rem}}";
+      "@media only screen and (max-width:720px){.status-reply-trigger{border-color:#d4c8b2!important;background:#f3ede2!important;padding:0.38rem 0.72rem;font-size:0.82rem;line-height:1.35}}";
     document.head.appendChild(style);
   }
 
