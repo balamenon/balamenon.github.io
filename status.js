@@ -17,7 +17,7 @@
     style.textContent =
       ".site-status-wrap{position:relative}" +
       ".status-bubble-row{position:relative;display:inline-flex;align-items:center;gap:0.4rem}" +
-      ".status-reply-trigger{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:1.1rem;border:1px solid #e2d9c8!important;background:#faf9f6!important;color:#7a6d5c!important;cursor:pointer;padding:0.2rem 0.65rem;font-size:0.82rem;font-weight:500;transition:all .2s ease;appearance:none;box-shadow:0 1px 3px rgba(0,0,0,0.02);font-family:inherit}" +
+      ".status-reply-trigger{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:1.1rem;border:1px solid #e2d9c8!important;background:#faf9f6!important;color:#7a6d5c!important;cursor:pointer;padding:0.2rem 0.65rem;font-size:0.82rem;font-weight:500;transition:all .2s ease;appearance:none;box-shadow:0 1px 3px rgba(0,0,0,0.02);font-family:inherit;margin-top:0.5rem;}" +
       ".status-reply-trigger:hover,.status-reply-trigger:focus-visible{transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,0.06);border-color:#d4c8b2!important;color:#2d2d2d!important;background:#ffffff!important}" +
       ".status-reply-trigger[hidden]{display:none}" +
       ".site-status-time{color:#a39c93;font-size:0.72em;font-weight:400;white-space:nowrap;letter-spacing:0}" +
