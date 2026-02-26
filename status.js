@@ -2,6 +2,7 @@
   var relativeTime = typeof Intl !== "undefined" && typeof Intl.RelativeTimeFormat === "function" ? new Intl.RelativeTimeFormat("en", { numeric: "auto" }) : null;
   var lastUpdatedAt = null;
   var refreshTimer = null;
+  var lastRenderedText = "";
 
   function getApiBase() {
     var configured = (window.SITE_API_BASE || window.NOTES_API_BASE || "").trim();
@@ -52,10 +53,12 @@
     var containers = document.querySelectorAll("[data-site-status-container]");
     var bubbles = document.querySelectorAll("[data-site-status]");
     var meta = document.querySelectorAll("[data-site-status-updated]");
+    var normalizedText = typeof text === "string" ? text.trim() : "";
 
-    if (!text) {
+    if (!normalizedText) {
       containers.forEach(function (el) {
         el.hidden = true;
+        el.classList.remove("status-enter");
       });
       bubbles.forEach(function (el) {
         el.textContent = "";
@@ -64,11 +67,12 @@
         el.textContent = "";
       });
       lastUpdatedAt = null;
+      lastRenderedText = "";
       return;
     }
 
     bubbles.forEach(function (el) {
-      el.textContent = text;
+      el.textContent = normalizedText;
     });
 
     var label = formatUpdatedTime(updatedAt);
@@ -76,11 +80,18 @@
       el.textContent = label;
     });
 
+    var shouldAnimate = lastRenderedText !== normalizedText;
     containers.forEach(function (el) {
       el.hidden = false;
+      if (shouldAnimate) {
+        el.classList.remove("status-enter");
+        void el.offsetWidth;
+        el.classList.add("status-enter");
+      }
     });
 
     lastUpdatedAt = updatedAt || null;
+    lastRenderedText = normalizedText;
   }
 
   function startRefreshTimer() {
