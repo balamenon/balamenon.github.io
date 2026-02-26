@@ -1,4 +1,5 @@
 import { consumeThoughtRateLimit, getAllNotes, getNoteThoughtTarget, updateNote } from "./db";
+import { JsonBodyParseError, parseJsonBodyWithLimit } from "./http";
 import { MAX_NOTE_WORDS, countWords, paginateNotes } from "./logic";
 import { listCachedSubstackPosts } from "./substack";
 import { handleTelegramWebhook, type Env as TelegramEnv } from "./telegram";
@@ -8,7 +9,11 @@ type Env = TelegramEnv & {
   SUBSTACK_FEED_URL?: string;
   ALLOWED_ORIGINS?: string;
   TURNSTILE_SECRET_KEY?: string;
+  TURNSTILE_OPTIONAL?: string;
 };
+
+const INTERNAL_EDIT_MAX_BODY_BYTES = 64 * 1024;
+const THOUGHTS_MAX_BODY_BYTES = 16 * 1024;
 
 function json(body: unknown, init?: ResponseInit): Response {
   return new Response(JSON.stringify(body), {
@@ -83,9 +88,12 @@ async function handleInternalEditApi(request: Request, env: Env, noteId: number)
 
   let body: { content?: string };
   try {
-    body = (await request.json()) as { content?: string };
-  } catch {
-    return json({ ok: false, error: "Invalid JSON payload" }, { status: 400 });
+    body = await parseJsonBodyWithLimit<{ content?: string }>(request, INTERNAL_EDIT_MAX_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof JsonBodyParseError) {
+      return json({ ok: false, error: error.message }, { status: error.status });
+    }
+    return json({ ok: false, error: "Could not read request body" }, { status: 400 });
   }
 
   const content = body.content?.trim();
@@ -165,7 +173,7 @@ async function sendTelegramThought(env: Env, input: { noteId: number; sender: st
 async function verifyTurnstile(request: Request, env: Env, token: string): Promise<boolean> {
   const secret = env.TURNSTILE_SECRET_KEY?.trim();
   if (!secret) {
-    return true;
+    return env.TURNSTILE_OPTIONAL === "true";
   }
 
   if (!token) {
@@ -240,9 +248,15 @@ async function handleThoughtsApi(request: Request, env: Env, noteId: number): Pr
 
   let body: { sender?: string; message?: string; turnstile_token?: string };
   try {
-    body = (await request.json()) as { sender?: string; message?: string; turnstile_token?: string };
-  } catch {
-    return json({ ok: false, error: "Invalid JSON payload" }, { status: 400 });
+    body = await parseJsonBodyWithLimit<{ sender?: string; message?: string; turnstile_token?: string }>(
+      request,
+      THOUGHTS_MAX_BODY_BYTES,
+    );
+  } catch (error) {
+    if (error instanceof JsonBodyParseError) {
+      return json({ ok: false, error: error.message }, { status: error.status });
+    }
+    return json({ ok: false, error: "Could not read request body" }, { status: 400 });
   }
 
   const sender = body.sender?.trim() ?? "";

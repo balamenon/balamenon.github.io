@@ -1,4 +1,5 @@
 import { clearSession, deleteNote, getRecentNotes, getSession, insertNote, upsertSession, updateNote } from "./db";
+import { JsonBodyParseError, parseJsonBodyWithLimit } from "./http";
 import { MAX_NOTE_WORDS, countWords, previewText, truncateToWords } from "./logic";
 import { reindexSubstackPosts } from "./substack";
 
@@ -30,6 +31,8 @@ type TelegramUpdate = {
   message?: TelegramMessage;
   callback_query?: TelegramCallbackQuery;
 };
+
+const TELEGRAM_WEBHOOK_MAX_BODY_BYTES = 128 * 1024;
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -371,9 +374,12 @@ export async function handleTelegramWebhook(request: Request, env: Env): Promise
 
   let update: TelegramUpdate;
   try {
-    update = (await request.json()) as TelegramUpdate;
-  } catch {
-    return jsonResponse({ ok: false, error: "Invalid JSON payload" }, 400);
+    update = await parseJsonBodyWithLimit<TelegramUpdate>(request, TELEGRAM_WEBHOOK_MAX_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof JsonBodyParseError) {
+      return jsonResponse({ ok: false, error: error.message }, error.status);
+    }
+    return jsonResponse({ ok: false, error: "Could not read request body" }, 400);
   }
 
   if (update.message) {

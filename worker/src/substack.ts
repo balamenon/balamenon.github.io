@@ -13,6 +13,26 @@ export type SubstackPost = {
   published_at: number;
 };
 
+function normalizeSafeExternalUrl(raw: string): string | null {
+  const candidate = raw.trim();
+  if (!candidate) {
+    return null;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    return null;
+  }
+
+  if (parsed.protocol !== "https:") {
+    return null;
+  }
+
+  return parsed.toString();
+}
+
 function decodeXmlEntities(text: string): string {
   const withoutCdata = text.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1");
   const namedDecoded = withoutCdata
@@ -55,7 +75,7 @@ function parseRssItems(xml: string, limit?: number): SubstackPost[] {
 
   for (const block of itemBlocks) {
     const title = stripHtml(extractTag(block, "title"));
-    const link = decodeXmlEntities(extractTag(block, "link"));
+    const link = normalizeSafeExternalUrl(decodeXmlEntities(extractTag(block, "link")));
     const rawDescription = extractTag(block, "description") || extractTag(block, "content:encoded");
     const description = stripHtml(rawDescription);
     const pubDate = decodeXmlEntities(extractTag(block, "pubDate"));
