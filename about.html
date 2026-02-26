@@ -93,6 +93,23 @@
             line-height: 1;
         }
 
+        .site-status-bubble {
+            display: inline-block;
+            margin-left: 0.5rem;
+            padding: 0.22rem 0.6rem;
+            border: 1px solid #d6c7af;
+            border-radius: 999px;
+            background: #f7f0e5;
+            color: #5f3b14;
+            font-size: 0.92rem;
+            font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir, "Nimbus Sans L", Roboto, "Noto Sans", "Segoe UI", Arial, Helvetica, "Helvetica Neue", sans-serif;
+            vertical-align: middle;
+            max-width: min(80vw, 36rem);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .notice {
             background-color: var(--gBg) !important;
             border-top: 1px solid var(--gBr) !important;
@@ -268,11 +285,14 @@
             text-decoration-line: underline;
         }
     </style>
+    <script>
+        window.SITE_API_BASE = "https://bala-notes-worker.menon-bala.workers.dev";
+    </script>
 </head>
 
 <body>
     <header>
-        <h2 class="site-name">Bala Menon</h2>
+        <h2 class="site-name">Bala Menon <span class="site-status-bubble" data-site-status hidden></span></h2>
         <nav>
             <a href="/">Home</a>
             <a href="/about.html">About</a>
@@ -311,6 +331,7 @@ Connect: <a href="https://x.com/balabuilds">@balabuilds</a>
             <a href="https://balamenon.com/about.html" target="_blank" rel="noopener noreferrer">About</a>
         </nav>
     </footer>
+    <script src="/status.js"></script>
 </body>
 
 </html>
