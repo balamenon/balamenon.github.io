@@ -17,13 +17,13 @@
     style.textContent =
       ".site-status-wrap{position:relative}" +
       ".status-bubble-row{position:relative;display:inline-flex;align-items:center;gap:0.4rem}" +
-      ".status-reply-trigger{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:1.8rem;height:1.8rem;border-radius:50%;border:1px solid #e2d9c8!important;background:#faf9f6!important;color:#7a6d5c!important;cursor:pointer;padding:0;transition:all .2s ease;appearance:none;box-shadow:0 2px 4px rgba(0,0,0,0.02)}" +
+      ".status-reply-trigger{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:1.1rem;border:1px solid #e2d9c8!important;background:#faf9f6!important;color:#7a6d5c!important;cursor:pointer;padding:0.2rem 0.65rem;font-size:0.82rem;font-weight:500;transition:all .2s ease;appearance:none;box-shadow:0 1px 3px rgba(0,0,0,0.02);font-family:inherit}" +
       ".status-reply-trigger:hover,.status-reply-trigger:focus-visible{transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,0.06);border-color:#d4c8b2!important;color:#2d2d2d!important;background:#ffffff!important}" +
-      ".status-reply-trigger svg{width:14px;height:14px;stroke-width:2.5;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}" +
       ".status-reply-trigger[hidden]{display:none}" +
       ".site-status-time{color:#a39c93;font-size:0.72em;font-weight:400;white-space:nowrap;letter-spacing:0}" +
-      ".status-reply-callout{position:absolute;top:calc(100% + .45rem);left:0;z-index:35;width:min(320px,calc(100vw - 3rem));padding:.62rem;border-radius:10px;border:1px solid #e0dbcf;background:#faf9f6;display:none;box-shadow:0 10px 22px rgba(60,55,43,.12)}" +
-      ".status-reply-callout.open{display:block}" +
+      ".status-reply-callout{position:absolute;top:calc(100% + .45rem);right:0;left:auto;z-index:35;width:min(320px,calc(100vw - 3rem));padding:.62rem;border-radius:10px;border:1px solid #e0dbcf;background:#faf9f6;display:none;box-shadow:0 10px 22px rgba(60,55,43,.12);transform-origin:top right}" +
+      ".status-reply-callout.open{display:block;animation:replyCalloutIn 200ms cubic-bezier(0.16,1,0.3,1)}" +
+      "@keyframes replyCalloutIn{from{opacity:0;transform:scale(0.94)}to{opacity:1;transform:scale(1)}}" +
       ".status-reply-textarea{width:100%;resize:vertical;min-height:56px;max-height:140px;border-radius:8px;border:1px solid #d9d2c6;padding:.45rem .52rem;background:#fffdfa;color:#2d2d2d;font:inherit;font-size:.92rem;line-height:1.35}" +
       ".status-reply-textarea:focus{outline:none;border-color:#cdb894;box-shadow:0 0 0 2px rgba(205,184,148,.22)}" +
       ".status-reply-actions{display:flex;gap:.45rem;margin-top:.2rem}" +
@@ -31,7 +31,7 @@
       ".status-reply-send:hover,.status-reply-cancel:hover,.status-reply-send:focus-visible,.status-reply-cancel:focus-visible{border-color:#ddd4c5!important;background:#ddd4c5!important;color:#2d2d2d!important;text-decoration:underline}" +
       ".status-reply-feedback{margin:.35rem 0 0;font-size:.84rem;color:#6b6359;min-height:1.1em}" +
       ".status-reply-turnstile{margin-top:.25rem;margin-bottom:.3rem;min-height:65px}" +
-      "@media only screen and (max-width:720px){.status-reply-trigger{width:2.2rem;height:2.2rem;border-color:#d4c8b2!important;background:#f3ede2!important}.status-reply-trigger svg{width:16px;height:16px}}";
+      "@media only screen and (max-width:720px){.status-reply-trigger{border-color:#d4c8b2!important;background:#f3ede2!important;padding:0.3rem 0.8rem;font-size:0.85rem}}";
     document.head.appendChild(style);
   }
 
@@ -204,7 +204,7 @@
     trigger.className = "status-reply-trigger";
     trigger.setAttribute("aria-label", "Reply to status");
     trigger.title = "Reply";
-    trigger.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>';
+    trigger.textContent = "Reply ↗";
     row.appendChild(trigger);
 
     var callout = document.createElement("div");
@@ -241,7 +241,7 @@
     callout.appendChild(turnstileSlot);
     callout.appendChild(actions);
     callout.appendChild(feedback);
-    container.appendChild(callout);
+    row.appendChild(callout);
 
     var turnstileWidgetId = null;
     var turnstileReady = false;
