@@ -50,6 +50,11 @@ type ThoughtRateLimitRow = {
   count: number;
 };
 
+type SiteStatusRow = {
+  status_text: string | null;
+  updated_at: string;
+};
+
 export async function insertNote(
   db: D1Database,
   input: {
@@ -291,6 +296,44 @@ export type ThoughtRateLimitResult = {
   remaining: number;
   retryAfterSeconds: number;
 };
+
+export type SiteStatusRecord = {
+  status_text: string | null;
+  updated_at: string;
+};
+
+export async function getSiteStatus(db: D1Database): Promise<SiteStatusRecord | null> {
+  const row = await db
+    .prepare(
+      `SELECT status_text, updated_at
+       FROM site_status
+       WHERE id = 1`,
+    )
+    .first<SiteStatusRow>();
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    status_text: row.status_text,
+    updated_at: row.updated_at,
+  };
+}
+
+export async function upsertSiteStatus(db: D1Database, statusText: string | null): Promise<void> {
+  await db
+    .prepare(
+      `INSERT INTO site_status (id, status_text)
+       VALUES (1, ?)
+       ON CONFLICT(id)
+       DO UPDATE SET
+         status_text = excluded.status_text,
+         updated_at = (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+    )
+    .bind(statusText)
+    .run();
+}
 
 export async function consumeThoughtRateLimit(
   db: D1Database,

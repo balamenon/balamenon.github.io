@@ -16,6 +16,7 @@
     <!--<link rel="stylesheet" href="simple.min.css">-->
     <script>
         const CONTENT_API_BASE = "https://bala-notes-worker.menon-bala.workers.dev";
+        window.SITE_API_BASE = CONTENT_API_BASE;
         const FALLBACK_POSTS = [
             {
                 title: "India needs its own demand generation engine",
@@ -479,6 +480,23 @@
             line-height: 1;
         }
 
+        .site-status-bubble {
+            display: inline-block;
+            margin-left: 0.5rem;
+            padding: 0.22rem 0.6rem;
+            border: 1px solid #d6c7af;
+            border-radius: 999px;
+            background: #f7f0e5;
+            color: #5f3b14;
+            font-size: 0.92rem;
+            font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir, "Nimbus Sans L", Roboto, "Noto Sans", "Segoe UI", Arial, Helvetica, "Helvetica Neue", sans-serif;
+            vertical-align: middle;
+            max-width: min(80vw, 36rem);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         main {
             padding-top: 0 !important;
         }
@@ -628,7 +646,7 @@
 
 <body>
     <header>
-        <h2 class="site-name">Bala Menon</h2>
+        <h2 class="site-name">Bala Menon <span class="site-status-bubble" data-site-status hidden></span></h2>
         <nav>
             <a href="/">Home</a>
             <a href="/about.html">About</a>
@@ -659,6 +677,7 @@
             <a href="https://balamenon.com/about.html" target="_blank" rel="noopener noreferrer">About</a>
         </nav>
     </footer>
+    <script src="/status.js"></script>
 </body>
 
 </html>

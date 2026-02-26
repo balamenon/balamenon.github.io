@@ -1,0 +1,8 @@
+# Define what makes a folder a "Project Root"
+project_root_markers = [".git", "package.json", "AGENTS.md"]
+
+# Explicitly exclude heavy directories from indexing/search
+# Note: Codex often respects .gitignore, but this forces it.
+[project]
+exclude_dirs = ["node_modules", "dist", ".git", "build", "coverage"]
+project_doc_max_bytes = 32768 # Limit total instruction size to 32KB

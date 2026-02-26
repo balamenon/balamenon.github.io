@@ -1,4 +1,4 @@
-import { consumeThoughtRateLimit, getAllNotes, getNoteThoughtTarget, updateNote } from "./db";
+import { consumeThoughtRateLimit, getAllNotes, getNoteThoughtTarget, getSiteStatus, updateNote } from "./db";
 import { JsonBodyParseError, parseJsonBodyWithLimit } from "./http";
 import { MAX_NOTE_WORDS, countWords, paginateNotes } from "./logic";
 import { listCachedSubstackPosts } from "./substack";
@@ -299,6 +299,15 @@ async function handleSubstackPostsApi(request: Request, env: Env): Promise<Respo
   });
 }
 
+async function handleStatusApi(_request: Request, env: Env): Promise<Response> {
+  const status = await getSiteStatus(env.DB);
+  return json({
+    ok: true,
+    status: status?.status_text ?? null,
+    updated_at: status?.updated_at ?? null,
+  });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") {
@@ -327,6 +336,11 @@ export default {
 
     if (request.method === "GET" && url.pathname === "/api/substack/posts") {
       const response = await handleSubstackPostsApi(request, env);
+      return withCors(response, request, env);
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/status") {
+      const response = await handleStatusApi(request, env);
       return withCors(response, request, env);
     }
 

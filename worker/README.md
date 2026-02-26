@@ -7,6 +7,7 @@ This worker ingests Telegram notes and serves paginated notes for `notes.html`.
 - `POST /api/telegram/webhook`
 - `GET /api/notes?page=1&page_size=10&tz=UTC`
 - `GET /api/substack/posts?limit=10`
+- `GET /api/status`
 - `POST /api/notes/:id/edit` (internal bearer token)
 - `GET /api/health`
 
@@ -82,6 +83,8 @@ curl -X POST "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook" \
 - `/editnote` lists 20 recent notes with inline selection
 - `/deletenote` lists 20 recent notes with inline delete selection
 - `/reindex` fetches Substack feed and upserts posts into D1 cache
+- `/setstatus <text>` sets site status text (max 100 chars)
+- `/clearstatus` clears site status text
 
 ## Security settings
 

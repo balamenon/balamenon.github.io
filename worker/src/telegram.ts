@@ -1,4 +1,4 @@
-import { clearSession, deleteNote, getRecentNotes, getSession, insertNote, upsertSession, updateNote } from "./db";
+import { clearSession, deleteNote, getRecentNotes, getSession, insertNote, upsertSession, updateNote, upsertSiteStatus } from "./db";
 import { JsonBodyParseError, parseJsonBodyWithLimit } from "./http";
 import { MAX_NOTE_WORDS, countWords, previewText, truncateToWords } from "./logic";
 import { reindexSubstackPosts } from "./substack";
@@ -162,7 +162,11 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
   }
 
   if (!text) {
-    await sendMessage(env, chatId, "Please send text. Use /newnote <text>, /editnote, /deletenote, or /reindex.");
+    await sendMessage(
+      env,
+      chatId,
+      "Please send text. Use /newnote <text>, /editnote, /deletenote, /setstatus <text>, /clearstatus, or /reindex.",
+    );
     return;
   }
 
@@ -233,6 +237,30 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
     return;
   }
 
+  const setStatusMatch = text.match(/^\/setstatus(?:@\w+)?(?:\s+([\s\S]+))?$/);
+  if (setStatusMatch) {
+    const rawStatus = (setStatusMatch[1] ?? "").trim();
+    if (!rawStatus) {
+      await sendMessage(env, chatId, "Usage: /setstatus <status text up to 100 characters>");
+      return;
+    }
+
+    if (rawStatus.length > 100) {
+      await sendMessage(env, chatId, `Status is ${rawStatus.length} characters. Max is 100.`);
+      return;
+    }
+
+    await upsertSiteStatus(env.DB, rawStatus);
+    await sendMessage(env, chatId, `Status set: "${rawStatus}"`);
+    return;
+  }
+
+  if (/^\/clearstatus(?:@\w+)?$/.test(text)) {
+    await upsertSiteStatus(env.DB, null);
+    await sendMessage(env, chatId, "Status cleared.");
+    return;
+  }
+
   const session = await getSession(env.DB, userId);
   if (session?.state === "awaiting_edit_text" && session.selected_note_id) {
     const words = countWords(text);
@@ -246,7 +274,11 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
     return;
   }
 
-  await sendMessage(env, chatId, "Ignored. Use /newnote <text>, /editnote, /deletenote, or /reindex.");
+  await sendMessage(
+    env,
+    chatId,
+    "Ignored. Use /newnote <text>, /editnote, /deletenote, /setstatus <text>, /clearstatus, or /reindex.",
+  );
 }
 
 async function handleCallback(env: Env, callback: TelegramCallbackQuery): Promise<void> {
