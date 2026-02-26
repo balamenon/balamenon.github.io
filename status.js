@@ -23,7 +23,14 @@
       ".site-status-time{color:var(--gTextAlt);font-size:0.72em;font-weight:400;white-space:nowrap;letter-spacing:0}" +
       ".status-reply-callout{position:absolute;top:calc(100% + .45rem);left:0;right:auto;z-index:35;width:min(320px,calc(100vw - 3rem));padding:.62rem;border-radius:10px;border:1px solid var(--gBr);background:var(--gBg);display:none;box-shadow:0 10px 22px rgba(0,0,0,.12);transform-origin:top left}" +
       ".status-reply-callout.open{display:block;animation:replyCalloutIn 200ms cubic-bezier(0.16,1,0.3,1)}" +
+      ".status-reply-callout.sending{pointer-events:none;animation:statusSendFlyAway 420ms cubic-bezier(0.22,0.61,0.36,1) forwards}" +
       "@keyframes replyCalloutIn{from{opacity:0;transform:scale(0.94)}to{opacity:1;transform:scale(1)}}" +
+      "@keyframes statusSendFlyAway{0%{opacity:1;transform:translate(0,0) scale(1);filter:blur(0)}70%{opacity:0.8;transform:translate(var(--fly-x,120px),var(--fly-y,-95px)) scale(0.52);filter:blur(0.4px)}100%{opacity:0;transform:translate(var(--fly-x,170px),var(--fly-y,-140px)) scale(0.2);filter:blur(1px)}}" +
+      ".status-toast{position:fixed;top:1rem;right:1rem;z-index:100;max-width:min(360px,calc(100vw - 2rem));background:var(--gBg);color:var(--gDes);border:1px solid var(--gBr);border-radius:10px;padding:0.55rem 0.75rem;font-size:0.92rem;box-shadow:0 8px 22px rgba(0,0,0,0.16);opacity:0;transform:translateY(-10px) scale(0.98);pointer-events:none;transition:opacity 180ms ease,transform 180ms ease}" +
+      ".status-toast.show{opacity:1;transform:translateY(0) scale(1)}" +
+      ".status-toast.sending{border-color:var(--gBr);background:var(--gBg)}" +
+      ".status-toast.sent{border-color:#9fc6a7;background:#eef8f0;color:#1e3f24}" +
+      ".status-toast.failed{border-color:#e2aaaa;background:#fff1f1;color:#6b1a1a}" +
       ".status-reply-textarea{width:100%;resize:vertical;min-height:56px;max-height:140px;border-radius:8px;border:1px solid var(--gBr);padding:.45rem .52rem;background:var(--gBgAlt);color:var(--gDes);font:inherit;font-size:.92rem;line-height:1.35}" +
       ".status-reply-textarea:focus{outline:none;border-color:var(--JKqx2);box-shadow:0 0 0 2px rgba(0,102,204,.22)}" +
       ".status-reply-actions{display:flex;gap:.45rem;margin-top:.2rem}" +
@@ -114,7 +121,37 @@
       return;
     }
     activeReplyCallout.classList.remove("open");
+    activeReplyCallout.classList.remove("sending");
+    activeReplyCallout.style.removeProperty("--fly-x");
+    activeReplyCallout.style.removeProperty("--fly-y");
     activeReplyCallout = null;
+  }
+
+  var statusToastTimer = null;
+  function showStatusToast(kind, text, autoHideMs) {
+    var toast = document.getElementById("status-toast-global");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "status-toast-global";
+      toast.className = "status-toast";
+      toast.setAttribute("aria-live", "polite");
+      document.body.appendChild(toast);
+    }
+    
+    toast.classList.remove("sending", "sent", "failed", "show");
+    toast.textContent = text;
+    toast.classList.add(kind, "show");
+    
+    if (statusToastTimer) {
+      clearTimeout(statusToastTimer);
+      statusToastTimer = null;
+    }
+    
+    if (autoHideMs && autoHideMs > 0) {
+      statusToastTimer = setTimeout(function () {
+        toast.classList.remove("show");
+      }, autoHideMs);
+    }
   }
 
   function ensureTurnstileScript() {
@@ -269,6 +306,7 @@
       if (wasOpen) {
         return;
       }
+      callout.classList.remove("sending");
       callout.classList.add("open");
       activeReplyCallout = callout;
       feedback.textContent = "";
@@ -284,7 +322,7 @@
       }
     });
 
-    sendBtn.addEventListener("click", async function () {
+    sendBtn.addEventListener("click", function () {
       var message = textarea.value.trim();
       if (!message) {
         feedback.textContent = "Please add a message.";
@@ -304,21 +342,44 @@
       sendBtn.disabled = true;
       feedback.textContent = "";
 
-      try {
-        await submitStatusReply(message, token);
-        textarea.value = "";
+      callout.classList.add("sending");
+      var rect = callout.getBoundingClientRect();
+      var targetX = window.innerWidth - 24;
+      var targetY = 18;
+      var deltaX = Math.round(targetX - rect.right);
+      var deltaY = Math.round(targetY - rect.top);
+      callout.style.setProperty("--fly-x", deltaX + "px");
+      callout.style.setProperty("--fly-y", deltaY + "px");
+      
+      showStatusToast("sending", "Sending your thought...", 0);
+
+      var submittedMessage = message;
+      textarea.value = "";
+
+      setTimeout(function () {
         callout.classList.remove("open");
+        callout.classList.remove("sending");
+        callout.style.removeProperty("--fly-x");
+        callout.style.removeProperty("--fly-y");
         if (activeReplyCallout === callout) {
           activeReplyCallout = null;
         }
-      } catch (error) {
-        feedback.textContent = (error && error.message) || "Could not send reply.";
-      } finally {
-        sendBtn.disabled = false;
-        if (turnstileWidgetId !== null && window.turnstile && typeof window.turnstile.reset === "function") {
-          window.turnstile.reset(turnstileWidgetId);
-        }
-      }
+      }, 430);
+
+      submitStatusReply(submittedMessage, token)
+        .then(function () {
+          showStatusToast("sent", "Sent. Thank you.", 2400);
+        })
+        .catch(function (error) {
+          showStatusToast("failed", (error && error.message) || "Could not send reply.", 3200);
+          feedback.textContent = (error && error.message) || "Could not send reply.";
+        })
+        .finally(function () {
+          sendBtn.disabled = false;
+          if (turnstileWidgetId !== null && window.turnstile && typeof window.turnstile.reset === "function") {
+            window.turnstile.reset(turnstileWidgetId);
+          }
+        });
     });
 
     container.__statusReplyInit = true;
