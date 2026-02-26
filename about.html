@@ -11,7 +11,7 @@
     <title>Bala Menon | Foundational Systems</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400..900&display=swap" rel="stylesheet">
     
     <!--<link rel="stylesheet" href="simple.min.css">-->
     <script>
@@ -68,11 +68,30 @@
         }
 
         :root {
-            --gBg: #e5edff;
-            --gBr: #C2410C;
-            --gDes: #2D2D2D;
-            --JKqx2: #C2410C;
+            --gBg: #ffffff;
+            --gBr: #d2d2d7;
+            --gDes: #1d1d1f;
+            --JKqx2: #0066cc;
+            --gBgAlt: #f5f5f7;
+            --gTextAlt: #86868b;
             --sans-font: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --gBg: #000000;
+                --gBr: #424245;
+                --gDes: #f5f5f7;
+                --JKqx2: #2997ff;
+                --gBgAlt: #1d1d1f;
+                --gTextAlt: #86868b;
+            }
+        }
+
+        body {
+            background-color: var(--gBg) !important;
+            color: var(--gDes) !important;
+            font-family: var(--sans-font) !important;
         }
 
         header {
@@ -93,10 +112,10 @@
 
         .site-name {
             margin: 0;
-            color: #2d2d2d;
-            font-family: "Playfair Display", Georgia, Cambria, "Times New Roman", serif;
+            color: var(--gDes);
+            font-family: var(--sans-font);
             font-size: clamp(2rem, 11cqi, 4.5rem) !important;
-            font-weight: 400;
+            font-weight: 600;
             letter-spacing: -0.03em;
             line-height: 0.95;
         }
@@ -120,16 +139,16 @@
             position: relative;
             display: inline-block;
             padding: 0.38rem 0.72rem;
-            border: 1px solid #e2d9c8;
+            border: 1px solid var(--gBr);
             border-radius: 1.1rem;
-            background: #faf9f6;
+            background: var(--gBgAlt);
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-            color: #3f3529;
+            color: var(--gDes);
             font-size: 0.82rem;
             font-weight: 400;
             letter-spacing: -0.005em;
             line-height: 1.35;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif;
+            font-family: var(--sans-font);
             max-width: min(28ch, 50vw);
             white-space: normal;
             word-wrap: break-word;
@@ -143,9 +162,9 @@
             bottom: -0.5rem;
             width: 0.42rem;
             height: 0.42rem;
-            border: 1px solid #e2d9c8;
+            border: 1px solid var(--gBr);
             border-radius: 50%;
-            background: #faf9f6;
+            background: var(--gBgAlt);
         }
 
         .site-status-bubble::after {
@@ -155,9 +174,9 @@
             bottom: -0.85rem;
             width: 0.28rem;
             height: 0.28rem;
-            border: 1px solid #e2d9c8;
+            border: 1px solid var(--gBr);
             border-radius: 50%;
-            background: #faf9f6;
+            background: var(--gBgAlt);
         }
 
         .site-status-meta {
@@ -250,7 +269,8 @@
         header nav a:visited {
             border: none !important;
             border-radius: 8px !important;
-            color: #6b6560 !important;
+            color: var(--gDes) !important;
+            opacity: 0.8 !important;
             margin: 0 !important;
             padding: 0 0.8rem !important;
             min-height: 44px !important;
@@ -259,11 +279,11 @@
             align-items: center !important;
             justify-content: center !important;
             background: transparent !important;
-            font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important;
+            font-family: var(--sans-font) !important;
             font-size: 15px !important;
             font-weight: 500 !important;
             letter-spacing: -0.01em !important;
-            transition: color 0.15s ease, background-color 0.15s ease !important;
+            transition: opacity 0.15s ease, background-color 0.15s ease !important;
         }
 
         header nav a:first-child {
@@ -271,19 +291,19 @@
         }
 
         header nav a:hover {
-            color: #2d2d2d !important;
-            background-color: rgba(0, 0, 0, 0.04) !important;
+            opacity: 1 !important;
+            background-color: var(--gBgAlt) !important;
             text-decoration: none !important;
         }
 
         header nav a:focus-visible {
-            outline: 2px solid #2d2d2d;
+            outline: 2px solid var(--gDes);
             outline-offset: 1px;
         }
 
         /* Footer */
         body > footer {
-            border-top: 0.5px solid #e6e1d7;
+            border-top: 1px solid var(--gBr);
             text-align: left !important;
             margin-top: 3.5rem;
             padding: 1.5rem 0 2rem !important;
@@ -300,10 +320,10 @@
 
         .footer-nav a,
         .footer-nav a:visited {
-            font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            font-family: var(--sans-font);
             font-size: 14px;
             font-weight: 500;
-            color: #9b958d;
+            color: var(--gTextAlt);
             text-decoration: none;
             letter-spacing: -0.01em;
             padding: 0 0.8rem;
@@ -320,13 +340,13 @@
         }
 
         .footer-nav a:hover {
-            color: #2d2d2d;
-            background-color: rgba(0, 0, 0, 0.04);
+            color: var(--gDes);
+            background-color: var(--gBgAlt);
             text-decoration: none !important;
         }
 
         .footer-nav a:focus-visible {
-            outline: 2px solid #2d2d2d;
+            outline: 2px solid var(--gDes);
             outline-offset: 1px;
         }
 
