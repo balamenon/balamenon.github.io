@@ -21,6 +21,7 @@
       ".status-reply-trigger:hover,.status-reply-trigger:focus-visible{transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,0.06);border-color:#d4c8b2!important;color:#2d2d2d!important;background:#ffffff!important}" +
       ".status-reply-trigger svg{width:14px;height:14px;stroke-width:2.5;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}" +
       ".status-reply-trigger[hidden]{display:none}" +
+      ".site-status-time{color:#a39c93;font-size:0.72em;font-weight:400;white-space:nowrap;letter-spacing:0}" +
       ".status-reply-callout{position:absolute;top:calc(100% + .45rem);left:0;z-index:35;width:min(320px,calc(100vw - 3rem));padding:.62rem;border-radius:10px;border:1px solid #e0dbcf;background:#faf9f6;display:none;box-shadow:0 10px 22px rgba(60,55,43,.12)}" +
       ".status-reply-callout.open{display:block}" +
       ".status-reply-textarea{width:100%;resize:vertical;min-height:56px;max-height:140px;border-radius:8px;border:1px solid #d9d2c6;padding:.45rem .52rem;background:#fffdfa;color:#2d2d2d;font:inherit;font-size:.92rem;line-height:1.35}" +
@@ -76,6 +77,35 @@
     }
 
     return "updated just now";
+  }
+
+  var SHORT_UNITS = [
+    { suffix: "y", seconds: 31536000 },
+    { suffix: "mo", seconds: 2592000 },
+    { suffix: "d", seconds: 86400 },
+    { suffix: "h", seconds: 3600 },
+    { suffix: "m", seconds: 60 }
+  ];
+
+  function formatCompactTime(updatedAt) {
+    if (!updatedAt) {
+      return "";
+    }
+    var updatedMs = Date.parse(updatedAt);
+    if (Number.isNaN(updatedMs)) {
+      return "";
+    }
+    var deltaSeconds = Math.round((Date.now() - updatedMs) / 1000);
+    if (deltaSeconds < 45) {
+      return "now";
+    }
+    for (var i = 0; i < SHORT_UNITS.length; i += 1) {
+      var u = SHORT_UNITS[i];
+      if (deltaSeconds >= u.seconds) {
+        return Math.floor(deltaSeconds / u.seconds) + u.suffix;
+      }
+    }
+    return "now";
   }
 
   function closeActiveReplyCallout() {
@@ -326,13 +356,21 @@
       return;
     }
 
+    var compactLabel = formatCompactTime(updatedAt);
     bubbles.forEach(function (el) {
       el.textContent = normalizedText;
+      if (compactLabel) {
+        var timeSpan = document.createElement("span");
+        timeSpan.className = "site-status-time";
+        timeSpan.setAttribute("data-site-status-inline-time", "");
+        timeSpan.textContent = " \u00b7 " + compactLabel;
+        el.appendChild(timeSpan);
+      }
     });
 
-    var label = formatUpdatedTime(updatedAt);
     meta.forEach(function (el) {
-      el.textContent = label;
+      el.textContent = "";
+      el.style.display = "none";
     });
 
     var shouldAnimate = lastRenderedText !== normalizedText;
@@ -367,10 +405,10 @@
       if (!lastUpdatedAt) {
         return;
       }
-      var label = formatUpdatedTime(lastUpdatedAt);
-      var meta = document.querySelectorAll("[data-site-status-updated]");
-      meta.forEach(function (el) {
-        el.textContent = label;
+      var compactLabel = formatCompactTime(lastUpdatedAt);
+      var inlineTimeSpans = document.querySelectorAll("[data-site-status-inline-time]");
+      inlineTimeSpans.forEach(function (el) {
+        el.textContent = compactLabel ? " \u00b7 " + compactLabel : "";
       });
     }, 60000);
   }
