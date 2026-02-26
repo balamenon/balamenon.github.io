@@ -16,9 +16,10 @@
     style.id = "status-reply-styles";
     style.textContent =
       ".site-status-wrap{position:relative}" +
-      ".status-bubble-row{position:relative;display:inline-flex;align-items:center}" +
-      ".status-reply-trigger{position:absolute;top:50%;right:-2.15rem;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:1.7rem;height:1.7rem;border-radius:999px;border:1px solid #d2c1a7!important;background:#f3ede2!important;color:#5a4026!important;cursor:pointer;padding:0;line-height:1;transition:transform .16s ease,box-shadow .16s ease;appearance:none}" +
-      ".status-reply-trigger:hover,.status-reply-trigger:focus-visible{transform:translateY(calc(-50% - 1px));box-shadow:0 4px 10px rgba(88,72,48,.18);border-color:#c4ad8c!important;background:#c4ad8c!important;color:#fff!important}" +
+      ".status-bubble-row{position:relative;display:inline-flex;align-items:center;gap:0.4rem}" +
+      ".status-reply-trigger{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:1.8rem;height:1.8rem;border-radius:50%;border:1px solid #e2d9c8!important;background:#faf9f6!important;color:#7a6d5c!important;cursor:pointer;padding:0;transition:all .2s ease;appearance:none;box-shadow:0 2px 4px rgba(0,0,0,0.02)}" +
+      ".status-reply-trigger:hover,.status-reply-trigger:focus-visible{transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,0.06);border-color:#d4c8b2!important;color:#2d2d2d!important;background:#ffffff!important}" +
+      ".status-reply-trigger svg{width:14px;height:14px;stroke-width:2.5;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}" +
       ".status-reply-trigger[hidden]{display:none}" +
       ".status-reply-callout{position:absolute;top:calc(100% + .45rem);left:0;z-index:35;width:min(320px,calc(100vw - 3rem));padding:.62rem;border-radius:10px;border:1px solid #e0dbcf;background:#faf9f6;display:none;box-shadow:0 10px 22px rgba(60,55,43,.12)}" +
       ".status-reply-callout.open{display:block}" +
@@ -172,7 +173,7 @@
     trigger.className = "status-reply-trigger";
     trigger.setAttribute("aria-label", "Reply to status");
     trigger.title = "Reply";
-    trigger.textContent = "↩";
+    trigger.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>';
     row.appendChild(trigger);
 
     var callout = document.createElement("div");
