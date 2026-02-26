@@ -1,4 +1,4 @@
-import { clearSession, deleteNote, getRecentNotes, getSession, insertNote, upsertSession, updateNote, upsertSiteStatus } from "./db";
+import { clearSession, deleteNote, getRecentNotes, getSession, insertNote, setStatusRepliesEnabled, upsertSession, updateNote, upsertSiteStatus } from "./db";
 import { JsonBodyParseError, parseJsonBodyWithLimit } from "./http";
 import { MAX_NOTE_WORDS, countWords, previewText, truncateToWords } from "./logic";
 import { reindexSubstackPosts } from "./substack";
@@ -165,7 +165,7 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
     await sendMessage(
       env,
       chatId,
-      "Please send text. Use /newnote <text>, /editnote, /deletenote, /setstatus <text>, /clearstatus, or /reindex.",
+      "Please send text. Use /newnote <text>, /editnote, /deletenote, /setstatus <text>, /clearstatus, /enablereplies, or /reindex.",
     );
     return;
   }
@@ -250,14 +250,20 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
       return;
     }
 
-    await upsertSiteStatus(env.DB, rawStatus);
+    await upsertSiteStatus(env.DB, rawStatus, false);
     await sendMessage(env, chatId, `Status set: "${rawStatus}"`);
     return;
   }
 
   if (/^\/clearstatus(?:@\w+)?$/.test(text)) {
-    await upsertSiteStatus(env.DB, null);
+    await upsertSiteStatus(env.DB, null, false);
     await sendMessage(env, chatId, "Status cleared.");
+    return;
+  }
+
+  if (/^\/enablereplies(?:@\w+)?$/.test(text)) {
+    await setStatusRepliesEnabled(env.DB, true);
+    await sendMessage(env, chatId, "Status replies enabled for the current status.");
     return;
   }
 
@@ -277,7 +283,7 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
   await sendMessage(
     env,
     chatId,
-    "Ignored. Use /newnote <text>, /editnote, /deletenote, /setstatus <text>, /clearstatus, or /reindex.",
+    "Ignored. Use /newnote <text>, /editnote, /deletenote, /setstatus <text>, /clearstatus, /enablereplies, or /reindex.",
   );
 }
 

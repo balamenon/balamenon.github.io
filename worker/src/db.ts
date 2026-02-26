@@ -52,6 +52,7 @@ type ThoughtRateLimitRow = {
 
 type SiteStatusRow = {
   status_text: string | null;
+  status_replies_enabled: number;
   updated_at: string;
 };
 
@@ -299,13 +300,14 @@ export type ThoughtRateLimitResult = {
 
 export type SiteStatusRecord = {
   status_text: string | null;
+  status_replies_enabled: boolean;
   updated_at: string;
 };
 
 export async function getSiteStatus(db: D1Database): Promise<SiteStatusRecord | null> {
   const row = await db
     .prepare(
-      `SELECT status_text, updated_at
+      `SELECT status_text, status_replies_enabled, updated_at
        FROM site_status
        WHERE id = 1`,
     )
@@ -317,21 +319,38 @@ export async function getSiteStatus(db: D1Database): Promise<SiteStatusRecord | 
 
   return {
     status_text: row.status_text,
+    status_replies_enabled: Number(row.status_replies_enabled) === 1,
     updated_at: row.updated_at,
   };
 }
 
-export async function upsertSiteStatus(db: D1Database, statusText: string | null): Promise<void> {
+export async function upsertSiteStatus(
+  db: D1Database,
+  statusText: string | null,
+  statusRepliesEnabled = false,
+): Promise<void> {
   await db
     .prepare(
-      `INSERT INTO site_status (id, status_text)
-       VALUES (1, ?)
+      `INSERT INTO site_status (id, status_text, status_replies_enabled)
+       VALUES (1, ?, ?)
        ON CONFLICT(id)
        DO UPDATE SET
          status_text = excluded.status_text,
+         status_replies_enabled = excluded.status_replies_enabled,
          updated_at = (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
     )
-    .bind(statusText)
+    .bind(statusText, statusRepliesEnabled ? 1 : 0)
+    .run();
+}
+
+export async function setStatusRepliesEnabled(db: D1Database, enabled: boolean): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE site_status
+       SET status_replies_enabled = ?
+       WHERE id = 1`,
+    )
+    .bind(enabled ? 1 : 0)
     .run();
 }
 

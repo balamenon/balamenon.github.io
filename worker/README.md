@@ -8,6 +8,7 @@ This worker ingests Telegram notes and serves paginated notes for `notes.html`.
 - `GET /api/notes?page=1&page_size=10&tz=UTC`
 - `GET /api/substack/posts?limit=10`
 - `GET /api/status`
+- `POST /api/status/replies`
 - `POST /api/notes/:id/edit` (internal bearer token)
 - `GET /api/health`
 
@@ -85,12 +86,13 @@ curl -X POST "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook" \
 - `/reindex` fetches Substack feed and upserts posts into D1 cache
 - `/setstatus <text>` sets site status text (max 100 chars)
 - `/clearstatus` clears site status text
+- `/enablereplies` enables visitor replies for the current status
 
 ## Security settings
 
 - `ALLOWED_ORIGINS` (`wrangler.jsonc` var): comma-separated origin allowlist for CORS.
 - `TURNSTILE_SECRET_KEY` (secret): enables bot-thought submission verification.
-- In `notes.html`, set `window.TURNSTILE_SITE_KEY` to your Turnstile site key to activate the widget.
+- Set `window.TURNSTILE_SITE_KEY` on pages that render status replies to activate Turnstile verification.
 
 ## Substack cache flow
 

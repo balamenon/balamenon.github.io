@@ -170,6 +170,31 @@ async function sendTelegramThought(env: Env, input: { noteId: number; sender: st
   }
 }
 
+async function sendTelegramStatusReply(env: Env, input: { statusText: string; message: string }): Promise<void> {
+  const text =
+    `💬 New reply on status\n` +
+    `Received: ${new Date().toISOString()}\n` +
+    `Status: ${input.statusText}\n\n` +
+    `${input.message}`;
+
+  const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      chat_id: env.ALLOWED_TELEGRAM_ID,
+      text,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    console.error("Status reply relay failed:", response.status, detail);
+    throw new Error("TELEGRAM_RELAY_FAILED");
+  }
+}
+
 async function verifyTurnstile(request: Request, env: Env, token: string): Promise<boolean> {
   const secret = env.TURNSTILE_SECRET_KEY?.trim();
   if (!secret) {
@@ -287,6 +312,68 @@ async function handleThoughtsApi(request: Request, env: Env, noteId: number): Pr
   return json({ ok: true });
 }
 
+async function handleStatusRepliesApi(request: Request, env: Env): Promise<Response> {
+  const blockedOrigin = enforceAllowedOrigin(request, env);
+  if (blockedOrigin) {
+    return blockedOrigin;
+  }
+
+  const currentStatus = await getSiteStatus(env.DB);
+  const statusText = currentStatus?.status_text?.trim() ?? "";
+  if (!statusText) {
+    return json({ ok: false, error: "Status is not set" }, { status: 400 });
+  }
+  if (!currentStatus?.status_replies_enabled) {
+    return json({ ok: false, error: "Replies are disabled for this status" }, { status: 403 });
+  }
+
+  const ip = request.headers.get("CF-Connecting-IP")?.trim() || "unknown";
+  const rateResult = await consumeThoughtRateLimit(env.DB, `status-reply:${ip}`, 8, 60);
+  if (!rateResult.allowed) {
+    return json(
+      {
+        ok: false,
+        error: "Too many requests, please wait and try again.",
+        retry_after_seconds: rateResult.retryAfterSeconds,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateResult.retryAfterSeconds),
+        },
+      },
+    );
+  }
+
+  let body: { message?: string; turnstile_token?: string };
+  try {
+    body = await parseJsonBodyWithLimit<{ message?: string; turnstile_token?: string }>(request, THOUGHTS_MAX_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof JsonBodyParseError) {
+      return json({ ok: false, error: error.message }, { status: error.status });
+    }
+    return json({ ok: false, error: "Could not read request body" }, { status: 400 });
+  }
+
+  const message = body.message?.trim() ?? "";
+  if (!message || message.length > 2000) {
+    return json({ ok: false, error: "message is required and must be <= 2000 characters" }, { status: 400 });
+  }
+
+  const turnstileOk = await verifyTurnstile(request, env, body.turnstile_token?.trim() ?? "");
+  if (!turnstileOk) {
+    return json({ ok: false, error: "Verification failed" }, { status: 400 });
+  }
+
+  try {
+    await sendTelegramStatusReply(env, { statusText, message });
+  } catch {
+    return json({ ok: false, error: "Could not send reply right now" }, { status: 502 });
+  }
+
+  return json({ ok: true });
+}
+
 async function handleSubstackPostsApi(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   const rawLimit = Number.parseInt(url.searchParams.get("limit") ?? "10", 10);
@@ -304,6 +391,7 @@ async function handleStatusApi(_request: Request, env: Env): Promise<Response> {
   return json({
     ok: true,
     status: status?.status_text ?? null,
+    replies_enabled: status?.status_replies_enabled ?? false,
     updated_at: status?.updated_at ?? null,
   });
 }
@@ -341,6 +429,11 @@ export default {
 
     if (request.method === "GET" && url.pathname === "/api/status") {
       const response = await handleStatusApi(request, env);
+      return withCors(response, request, env);
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/status/replies") {
+      const response = await handleStatusRepliesApi(request, env);
       return withCors(response, request, env);
     }
 
