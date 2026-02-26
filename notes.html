@@ -63,6 +63,7 @@
             flex-direction: column;
             align-items: flex-start;
             margin-top: 0.42rem;
+            max-width: 100%;
         }
 
         .site-status-wrap[hidden] {
@@ -72,45 +73,39 @@
         .site-status-bubble {
             position: relative;
             display: inline-block;
-            padding: 0.4rem 0.78rem 0.44rem;
-            border: 1px solid #d8c4a8;
-            border-radius: 1.35rem;
-            background: #fffbf3;
-            box-shadow: 0 4px 12px rgba(95, 59, 20, 0.12);
-            color: #3f2912;
-            font-size: clamp(0.76rem, 1.15vw, 0.92rem);
-            font-weight: 560;
+            padding: 0.5rem 0.85rem;
+            border: 1px solid #e2d9c8;
+            border-radius: 1.25rem;
+            background: #faf9f6;
+            box-shadow: 0 4px 12px rgba(85, 75, 65, 0.06);
+            color: #3f3529;
+            font-size: clamp(0.8rem, 1.25vw, 0.95rem);
+            font-weight: 400;
             letter-spacing: -0.01em;
-            line-height: 1.22;
-            font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Avenir Next", Avenir, "Nimbus Sans L", Roboto, "Noto Sans", "Segoe UI", Arial, Helvetica, "Helvetica Neue", sans-serif;
-            max-width: min(34ch, 72vw);
+            line-height: 1.3;
+            font-family: inherit;
+            max-width: min(40ch, 85vw);
             white-space: normal;
-            text-wrap: balance;
+            word-wrap: break-word;
             overflow-wrap: anywhere;
         }
 
         .site-status-bubble::before {
             content: "";
             position: absolute;
-            left: -0.62rem;
-            bottom: 0.44rem;
-            width: 0.54rem;
-            height: 0.54rem;
-            border: 1px solid #d8c4a8;
-            border-radius: 50%;
-            background: #fffbf3;
+            left: -0.28rem;
+            bottom: 0.45rem;
+            width: 0.6rem;
+            height: 0.6rem;
+            border-bottom: 1px solid #e2d9c8;
+            border-left: 1px solid #e2d9c8;
+            background: #faf9f6;
+            border-bottom-left-radius: 0.3rem;
+            transform: skew(-15deg);
         }
 
         .site-status-bubble::after {
-            content: "";
-            position: absolute;
-            left: -1rem;
-            bottom: 0.18rem;
-            width: 0.34rem;
-            height: 0.34rem;
-            border: 1px solid #d8c4a8;
-            border-radius: 50%;
-            background: #fffbf3;
+            display: none;
         }
 
         .site-status-meta {
@@ -226,14 +221,14 @@
             }
 
             .site-status-wrap {
-                margin-top: 0.05rem;
-                margin-left: 0.2rem;
+                margin-top: 0.4rem;
+                margin-left: 0.4rem;
             }
 
             .site-status-bubble {
-                max-width: min(24ch, 70vw);
-                font-size: clamp(0.74rem, 3.35vw, 0.9rem);
-                padding: 0.36rem 0.72rem 0.4rem;
+                max-width: min(32ch, 80vw);
+                font-size: clamp(0.85rem, 4vw, 0.95rem);
+                padding: 0.45rem 0.8rem;
             }
 
             .site-status-meta {
