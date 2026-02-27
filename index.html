@@ -198,7 +198,7 @@
         }
 
         async function syncSubstackPosts() {
-            const endpoint = `${CONTENT_API_BASE}/api/substack/posts?limit=10`;
+            const endpoint = `${CONTENT_API_BASE}/api/substack/posts?limit=20`;
             try {
                 const response = await fetch(endpoint, {
                     headers: {
