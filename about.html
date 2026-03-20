@@ -104,11 +104,8 @@
 
         .site-identity {
             position: relative;
-            display: flex;
-            align-items: flex-end;
-            gap: 0;
-            flex-wrap: nowrap;
-            min-width: 0;
+            display: block;
+            overflow: visible;
         }
 
         .site-name {
@@ -119,19 +116,16 @@
             font-weight: 600;
             letter-spacing: -0.03em;
             line-height: 0.95;
-            flex: 1 1 auto;
-            min-width: 0;
         }
 
-        .site-status-wrap {
+        .site-identity > .site-status-wrap {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            align-self: flex-start;
-            margin-left: 0.6rem;
-            margin-top: 0;
-            flex: 0 0 auto;
-            max-width: min(28ch, 35vw);
+            margin-left: 0;
+            margin-top: 0.7rem;
+            max-width: min(28ch, calc(100vw - 6rem));
         }
 
         .site-status-wrap[hidden] {
@@ -213,6 +207,25 @@
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @media only screen and (min-width: 1180px) {
+            .site-identity {
+                display: inline-block;
+            }
+
+            .site-name {
+                white-space: nowrap;
+            }
+
+            .site-identity > .site-status-wrap {
+                position: absolute;
+                top: 0.45rem;
+                left: calc(100% + 1.4rem);
+                margin-top: 0;
+                width: max-content;
+                max-width: min(36rem, calc(100vw - 5rem));
             }
         }
 
@@ -362,7 +375,7 @@
                 font-size: clamp(2rem, 14vw, 3.2rem) !important;
             }
 
-            .site-status-wrap {
+            .site-identity > .site-status-wrap {
                 margin-left: 0;
                 margin-top: 0.5rem;
             }
