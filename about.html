@@ -108,6 +108,7 @@
             align-items: flex-end;
             gap: 0;
             flex-wrap: nowrap;
+            min-width: 0;
         }
 
         .site-name {
@@ -118,6 +119,8 @@
             font-weight: 600;
             letter-spacing: -0.03em;
             line-height: 0.95;
+            flex: 1 1 auto;
+            min-width: 0;
         }
 
         .site-status-wrap {
@@ -127,8 +130,8 @@
             align-self: flex-start;
             margin-left: 0.6rem;
             margin-top: 0;
-            flex-shrink: 1;
-            min-width: 0;
+            flex: 0 0 auto;
+            max-width: min(28ch, 35vw);
         }
 
         .site-status-wrap[hidden] {
