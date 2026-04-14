@@ -6,6 +6,23 @@
   var lastRenderedText = "";
   var activeReplyCallout = null;
   var turnstileScriptPromise = null;
+  var lastTelemetryMeasuredAt = null;
+
+  function ensureFooterTelemetryStyles() {
+    if (document.getElementById("footer-telemetry-styles")) {
+      return;
+    }
+
+    var style = document.createElement("style");
+    style.id = "footer-telemetry-styles";
+    style.textContent =
+      ".footer-telemetry{display:flex;justify-content:center;margin:0 0 0.9rem;min-height:1.4rem}" +
+      ".footer-telemetry[hidden]{display:none!important}" +
+      ".footer-telemetry-chip{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:0.45rem;padding:0.45rem 0.8rem;border:1px solid var(--gBr,var(--border));border-radius:999px;background:var(--gBgAlt,var(--accent-bg));color:var(--gTextAlt,var(--text-light));font-size:0.82rem;line-height:1.35}" +
+      ".footer-telemetry-segment{white-space:nowrap}" +
+      "@media only screen and (max-width:720px){.footer-telemetry-chip{row-gap:0.25rem;padding:0.5rem 0.75rem;white-space:normal}.footer-telemetry-segment{white-space:normal}}";
+    document.head.appendChild(style);
+  }
 
   function ensureReplyStyles() {
     if (document.getElementById("status-reply-styles")) {
@@ -114,6 +131,98 @@
       }
     }
     return "now";
+  }
+
+  function formatSpeed(value) {
+    if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+      return "";
+    }
+
+    if (value >= 100) {
+      return Math.round(value) + " Mbps";
+    }
+
+    if (value >= 10) {
+      return value.toFixed(1).replace(/\.0$/, "") + " Mbps";
+    }
+
+    return value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "") + " Mbps";
+  }
+
+  function formatAgeLabel(value) {
+    var compact = formatCompactTime(value);
+    if (!compact) {
+      return "";
+    }
+    return compact === "now" ? "just now" : compact + " ago";
+  }
+
+  function renderFooterTelemetry(telemetry) {
+    var containers = document.querySelectorAll("[data-site-footer-telemetry]");
+    if (!containers.length) {
+      return;
+    }
+
+    ensureFooterTelemetryStyles();
+
+    var batteryPercent =
+      telemetry && typeof telemetry.battery_percent === "number" && Number.isFinite(telemetry.battery_percent)
+        ? Math.round(telemetry.battery_percent)
+        : null;
+    var downloadLabel = telemetry ? formatSpeed(telemetry.download_mbps) : "";
+    var uploadLabel = telemetry ? formatSpeed(telemetry.upload_mbps) : "";
+    var connectionLabel =
+      telemetry && typeof telemetry.connection_label === "string" ? telemetry.connection_label.trim() : "";
+    var measuredAt = telemetry && typeof telemetry.measured_at === "string" ? telemetry.measured_at : "";
+    var measuredAgo = formatAgeLabel(measuredAt);
+    var segments = [];
+
+    if (batteryPercent !== null) {
+      segments.push("Battery " + batteryPercent + "%");
+    }
+    if (downloadLabel) {
+      segments.push("Down " + downloadLabel);
+    }
+    if (uploadLabel) {
+      segments.push("Up " + uploadLabel);
+    }
+    if (connectionLabel) {
+      segments.push(connectionLabel);
+    }
+    if (measuredAgo) {
+      segments.push(measuredAgo);
+    }
+
+    if (!segments.length) {
+      containers.forEach(function (container) {
+        container.hidden = true;
+        container.textContent = "";
+      });
+      lastTelemetryMeasuredAt = null;
+      return;
+    }
+
+    containers.forEach(function (container) {
+      container.hidden = false;
+      container.textContent = "";
+
+      var chip = document.createElement("div");
+      chip.className = "footer-telemetry-chip";
+
+      segments.forEach(function (segment) {
+        var part = document.createElement("span");
+        part.className = "footer-telemetry-segment";
+        if (segment === measuredAgo && measuredAgo) {
+          part.setAttribute("data-site-footer-telemetry-age", "");
+        }
+        part.textContent = segment;
+        chip.appendChild(part);
+      });
+
+      container.appendChild(chip);
+    });
+
+    lastTelemetryMeasuredAt = measuredAt || null;
   }
 
   function closeActiveReplyCallout() {
@@ -463,14 +572,21 @@
       return;
     }
     refreshTimer = window.setInterval(function () {
-      if (!lastUpdatedAt) {
-        return;
+      if (lastUpdatedAt) {
+        var compactLabel = formatCompactTime(lastUpdatedAt);
+        var inlineTimeSpans = document.querySelectorAll("[data-site-status-inline-time]");
+        inlineTimeSpans.forEach(function (el) {
+          el.textContent = compactLabel ? " \u00b7 " + compactLabel : "";
+        });
       }
-      var compactLabel = formatCompactTime(lastUpdatedAt);
-      var inlineTimeSpans = document.querySelectorAll("[data-site-status-inline-time]");
-      inlineTimeSpans.forEach(function (el) {
-        el.textContent = compactLabel ? " \u00b7 " + compactLabel : "";
-      });
+
+      if (lastTelemetryMeasuredAt) {
+        var ageLabel = formatAgeLabel(lastTelemetryMeasuredAt);
+        var ageSpans = document.querySelectorAll("[data-site-footer-telemetry-age]");
+        ageSpans.forEach(function (el) {
+          el.textContent = ageLabel;
+        });
+      }
     }, 60000);
   }
 
@@ -489,7 +605,9 @@
     var statusText = typeof payload.status === "string" ? payload.status.replace(/\s+/g, " ").trim() : "";
     var updatedAt = typeof payload.updated_at === "string" ? payload.updated_at : "";
     var repliesEnabled = payload.replies_enabled === true;
+    var telemetry = payload.footer_telemetry && typeof payload.footer_telemetry === "object" ? payload.footer_telemetry : null;
     renderStatus(statusText, updatedAt, repliesEnabled);
+    renderFooterTelemetry(telemetry);
     startRefreshTimer();
   }
 
