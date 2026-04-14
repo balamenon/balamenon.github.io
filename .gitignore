@@ -5,11 +5,13 @@ worker/node_modules/
 # Wrangler/local state
 worker/.wrangler/
 .wrangler/
+worker/
 
 # Env and secrets
 .env
 .env.*
 *.local
+scripts/footer-telemetry.env
 
 # Logs
 npm-debug.log*

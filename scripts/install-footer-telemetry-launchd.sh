@@ -36,7 +36,7 @@ cat >"$PLIST_PATH" <<PLIST
     <string>${RUN_SCRIPT}</string>
   </array>
   <key>StartInterval</key>
-  <integer>14400</integer>
+  <integer>3600</integer>
   <key>RunAtLoad</key>
   <true/>
   <key>StandardOutPath</key>
