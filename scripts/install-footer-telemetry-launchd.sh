@@ -35,8 +35,13 @@ cat >"$PLIST_PATH" <<PLIST
   <array>
     <string>${RUN_SCRIPT}</string>
   </array>
-  <key>StartInterval</key>
-  <integer>3600</integer>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict>
+      <key>Minute</key>
+      <integer>0</integer>
+    </dict>
+  </array>
   <key>RunAtLoad</key>
   <true/>
   <key>StandardOutPath</key>
