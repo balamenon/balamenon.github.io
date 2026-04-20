@@ -6,28 +6,6 @@
   var lastRenderedText = "";
   var activeReplyCallout = null;
   var turnstileScriptPromise = null;
-  var lastTelemetryMeasuredAt = null;
-
-  function ensureFooterTelemetryStyles() {
-    if (document.getElementById("footer-telemetry-styles")) {
-      return;
-    }
-
-    var style = document.createElement("style");
-    style.id = "footer-telemetry-styles";
-    style.textContent =
-      ".footer-telemetry{display:flex;justify-content:center;margin:0 0 1.2rem;min-height:1.4rem}" +
-      ".footer-telemetry[hidden]{display:none!important}" +
-      ".footer-telemetry-card{display:flex;flex-direction:column;align-items:center;gap:0.34rem;padding:0.15rem 0;max-width:min(40rem,100%)}" +
-      ".footer-telemetry-kicker{color:var(--gTextAlt,var(--text-light));font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:500;line-height:1.2;opacity:0.9}" +
-      ".footer-telemetry-chip{display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0.55rem;padding:0.62rem 1rem;border:1px solid color-mix(in srgb, var(--gBr,var(--border)) 82%, transparent);border-radius:999px;background:color-mix(in srgb, var(--gBgAlt,var(--accent-bg)) 78%, var(--gBg,var(--bg)) 22%);box-shadow:0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--gDes,var(--text));font-size:0.96rem;line-height:1.2;letter-spacing:-0.02em}" +
-      ".footer-telemetry-segment{white-space:nowrap}" +
-      ".footer-telemetry-segment.primary{font-weight:500;color:var(--gDes,var(--text))}" +
-      ".footer-telemetry-segment.secondary{color:var(--gTextAlt,var(--text-light));font-size:0.9em}" +
-      ".footer-telemetry-separator{width:0.22rem;height:0.22rem;border-radius:999px;background:color-mix(in srgb, var(--gTextAlt,var(--text-light)) 68%, transparent);flex:0 0 auto}" +
-      "@media only screen and (max-width:720px){.footer-telemetry{margin-bottom:1rem}.footer-telemetry-card{gap:0.3rem}.footer-telemetry-kicker{font-size:0.68rem;letter-spacing:0.07em}.footer-telemetry-chip{padding:0.68rem 0.92rem;font-size:0.88rem;row-gap:0.35rem;max-width:100%}.footer-telemetry-segment{white-space:normal}.footer-telemetry-separator{display:none}}";
-    document.head.appendChild(style);
-  }
 
   function ensureReplyStyles() {
     if (document.getElementById("status-reply-styles")) {
@@ -136,123 +114,6 @@
       }
     }
     return "now";
-  }
-
-  function formatSpeed(value) {
-    if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
-      return "";
-    }
-
-    if (value >= 100) {
-      return Math.round(value) + " Mbps";
-    }
-
-    if (value >= 10) {
-      return value.toFixed(1).replace(/\.0$/, "") + " Mbps";
-    }
-
-    return value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "") + " Mbps";
-  }
-
-  function formatAgeLabel(value) {
-    var compact = formatCompactTime(value);
-    if (!compact) {
-      return "";
-    }
-    return compact === "now" ? "just now" : compact + " ago";
-  }
-
-  function renderFooterTelemetry(telemetry) {
-    var containers = document.querySelectorAll("[data-site-footer-telemetry]");
-    if (!containers.length) {
-      return;
-    }
-
-    ensureFooterTelemetryStyles();
-
-    var batteryPercent =
-      telemetry && typeof telemetry.battery_percent === "number" && Number.isFinite(telemetry.battery_percent)
-        ? Math.round(telemetry.battery_percent)
-        : null;
-    var downloadLabel = telemetry ? formatSpeed(telemetry.download_mbps) : "";
-    var uploadLabel = telemetry ? formatSpeed(telemetry.upload_mbps) : "";
-    var connectionLabel =
-      telemetry && typeof telemetry.connection_label === "string" ? telemetry.connection_label.trim() : "";
-    var measuredAt = telemetry && typeof telemetry.measured_at === "string" ? telemetry.measured_at : "";
-    var measuredAgo = formatAgeLabel(measuredAt);
-    var primarySegments = [];
-    var secondarySegments = [];
-
-    if (batteryPercent !== null) {
-      primarySegments.push(batteryPercent + "% battery");
-    }
-    if (downloadLabel) {
-      primarySegments.push(downloadLabel + " down");
-    }
-    if (uploadLabel) {
-      primarySegments.push(uploadLabel + " up");
-    }
-    if (connectionLabel) {
-      secondarySegments.push(connectionLabel === "en0" ? "Wi-Fi link" : connectionLabel);
-    }
-    if (measuredAgo) {
-      secondarySegments.push(measuredAgo);
-    }
-
-    if (!primarySegments.length && !secondarySegments.length) {
-      containers.forEach(function (container) {
-        container.hidden = true;
-        container.textContent = "";
-      });
-      lastTelemetryMeasuredAt = null;
-      return;
-    }
-
-    containers.forEach(function (container) {
-      container.hidden = false;
-      container.textContent = "";
-
-      var card = document.createElement("div");
-      card.className = "footer-telemetry-card";
-
-      var kicker = document.createElement("div");
-      kicker.className = "footer-telemetry-kicker";
-      kicker.textContent = "Synced from my primary laptop";
-
-      var chip = document.createElement("div");
-      chip.className = "footer-telemetry-chip";
-
-      var orderedSegments = [];
-      primarySegments.forEach(function (segment) {
-        orderedSegments.push({ text: segment, tone: "primary" });
-      });
-      secondarySegments.forEach(function (segment) {
-        orderedSegments.push({ text: segment, tone: "secondary" });
-      });
-
-      orderedSegments.forEach(function (segment, index) {
-        if (index > 0) {
-          var separator = document.createElement("span");
-          separator.className = "footer-telemetry-separator";
-          separator.setAttribute("aria-hidden", "true");
-          chip.appendChild(separator);
-        }
-
-        var part = document.createElement("span");
-        part.className = "footer-telemetry-segment " + segment.tone;
-        if (segment.text === measuredAgo && measuredAgo) {
-          part.setAttribute("data-site-footer-telemetry-age", "");
-        }
-        part.textContent = segment.text;
-        chip.appendChild(part);
-      });
-
-      card.appendChild(kicker);
-      card.appendChild(chip);
-      container.appendChild(card);
-    });
-
-    lastTelemetryMeasuredAt = measuredAt || null;
   }
 
   function closeActiveReplyCallout() {
@@ -609,14 +470,6 @@
           el.textContent = compactLabel ? " \u00b7 " + compactLabel : "";
         });
       }
-
-      if (lastTelemetryMeasuredAt) {
-        var ageLabel = formatAgeLabel(lastTelemetryMeasuredAt);
-        var ageSpans = document.querySelectorAll("[data-site-footer-telemetry-age]");
-        ageSpans.forEach(function (el) {
-          el.textContent = ageLabel;
-        });
-      }
     }, 60000);
   }
 
@@ -635,9 +488,7 @@
     var statusText = typeof payload.status === "string" ? payload.status.replace(/\s+/g, " ").trim() : "";
     var updatedAt = typeof payload.updated_at === "string" ? payload.updated_at : "";
     var repliesEnabled = payload.replies_enabled === true;
-    var telemetry = payload.footer_telemetry && typeof payload.footer_telemetry === "object" ? payload.footer_telemetry : null;
     renderStatus(statusText, updatedAt, repliesEnabled);
-    renderFooterTelemetry(telemetry);
     startRefreshTimer();
   }
 
