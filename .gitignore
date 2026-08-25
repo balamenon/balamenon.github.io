@@ -2,6 +2,10 @@
 node_modules/
 worker/node_modules/
 
+# Python bytecode
+__pycache__/
+*.pyc
+
 # Wrangler/local state
 worker/.wrangler/
 .wrangler/
@@ -12,6 +16,7 @@ worker/
 .env.*
 *.local
 scripts/footer-telemetry.env
+pingbacks.txt
 
 # Logs
 npm-debug.log*
